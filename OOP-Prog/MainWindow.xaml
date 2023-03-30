@@ -5,11 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:OOP_Prog"
         mc:Ignorable="d"
-        Title="Unsanitary frenzy" ResizeMode="NoResize" Height="200" Width="450">
+        Title="MainWindow" Height="450" Width="800">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10"></ColumnDefinition>
-            <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="10"></ColumnDefinition>
         </Grid.ColumnDefinitions>
@@ -18,45 +17,5 @@
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="10"></RowDefinition>
         </Grid.RowDefinitions>
-
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1" Grid.Column="1">
-            <Label FontStyle="Oblique">Experiment control panel</Label>
-            <GroupBox Header="Main controls">
-                <WrapPanel HorizontalAlignment="Center">
-                    <Button Margin="3" Name="ButtonStart">Start</Button>
-                    <Button Margin="3" Name="ButtonStop">Stop</Button>
-                </WrapPanel>
-            </GroupBox>
-            <GroupBox Header="TimeExp™">
-                <StackPanel>
-                    <DockPanel>
-                        <Label>Run for</Label>
-                        <TextBox Margin="3" MinWidth="15" Name="TextboxExperimentTime"></TextBox>
-                        <ComboBox Name="ComboboxTimeMode" SelectedIndex="0">
-                            <ComboBoxItem>seconds</ComboBoxItem>
-                            <ComboBoxItem>minutes</ComboBoxItem>
-                            <ComboBoxItem>hours</ComboBoxItem>
-                            <ComboBoxItem>days</ComboBoxItem>
-                        </ComboBox>
-                    </DockPanel>
-                    <Button Margin="3" Name="ButtonStartTimed">Start</Button>
-                </StackPanel>
-            </GroupBox>
-        </StackPanel>
-
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1" Grid.Column="2">
-            <DockPanel>
-                <Label>Viruses:</Label>
-                <Label Name="LabelVirusCount" Foreground="Red">0</Label>
-            </DockPanel>
-            <DockPanel>
-                <Label>Bacterias:</Label>
-                <Label Name="LabelBacteriaCount" Foreground="Green">0</Label>
-            </DockPanel>
-            <DockPanel>
-                <Label>Fungus:</Label>
-                <Label Name="LabelFungiCount" Foreground="Blue">0</Label>
-            </DockPanel>
-        </StackPanel>
     </Grid>
 </Window>
