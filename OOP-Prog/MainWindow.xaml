@@ -23,8 +23,8 @@
             <Label FontStyle="Oblique">Experiment control panel</Label>
             <GroupBox Header="Main controls">
                 <WrapPanel HorizontalAlignment="Center">
-                    <Button Margin="3">Start</Button>
-                    <Button Margin="3">Stop</Button>
+                    <Button Margin="3" Name="ButtonStart">Start</Button>
+                    <Button Margin="3" Name="ButtonStop">Stop</Button>
                 </WrapPanel>
             </GroupBox>
             <GroupBox Header="TimeExp™">
@@ -32,14 +32,14 @@
                     <DockPanel>
                         <Label>Run for</Label>
                         <TextBox Margin="3" MinWidth="15" Name="TextboxExperimentTime"></TextBox>
-                        <ComboBox SelectedIndex="0">
+                        <ComboBox Name="ComboboxTimeMode" SelectedIndex="0">
                             <ComboBoxItem>seconds</ComboBoxItem>
                             <ComboBoxItem>minutes</ComboBoxItem>
                             <ComboBoxItem>hours</ComboBoxItem>
                             <ComboBoxItem>days</ComboBoxItem>
                         </ComboBox>
                     </DockPanel>
-                    <Button Margin="3">Start</Button>
+                    <Button Margin="3" Name="ButtonStartTimed">Start</Button>
                 </StackPanel>
             </GroupBox>
         </StackPanel>
