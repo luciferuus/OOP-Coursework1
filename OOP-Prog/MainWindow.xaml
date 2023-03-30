@@ -5,11 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:OOP_Prog"
         mc:Ignorable="d"
-        Title="Unsanitary frenzy" ResizeMode="NoResize" Height="200" Width="450">
+        Title="Unsanitary frenzy" ResizeMode="NoResize" Height="250" Width="450">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10"></ColumnDefinition>
-            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="10"></ColumnDefinition>
         </Grid.ColumnDefinitions>
@@ -46,17 +46,22 @@
         
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1" Grid.Column="2">
             <DockPanel>
-                <Label>Viruses: </Label>
-                <Label Name="LabelVirusCount" Foreground="Red">0</Label>
+                <DockPanel>
+                    <Label>Viruses: </Label>
+                    <Label Name="LabelVirusCount" Foreground="Red">0</Label>
+                </DockPanel>
+                <DockPanel>
+                    <Label>Bacterias: </Label>
+                    <Label Name="LabelBacteriaCount" Foreground="Green">0</Label>
+                </DockPanel>
+                <DockPanel>
+                    <Label>Fungus: </Label>
+                    <Label Name="LabelFungiCount" Foreground="Blue">0</Label>
+                </DockPanel>
             </DockPanel>
-            <DockPanel>
-                <Label>Bacterias: </Label>
-                <Label Name="LabelBacteriaCount" Foreground="Green">0</Label>
-            </DockPanel>
-            <DockPanel>
-                <Label>Fungus: </Label>
-                <Label Name="LabelFungiCount" Foreground="Blue">0</Label>
-            </DockPanel>
+            <GroupBox Header="PetriLive™ Cam">
+                <Image Source="/SEyiHDodiZs.jpg" MaxHeight="300" MaxWidth="200"></Image>
+            </GroupBox>
         </StackPanel>
         
         
