@@ -97,5 +97,11 @@
   <ItemGroup>
     <Resource Include="SEyiHDodiZs.jpg" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="34609919_petridish1.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="34609919_petridish1 %282%29.jpg" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
