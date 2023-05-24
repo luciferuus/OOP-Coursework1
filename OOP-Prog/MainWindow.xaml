@@ -63,7 +63,7 @@
             </DockPanel>
         </StackPanel>
         <GroupBox Header="PetriLive™ Cam" Grid.Row="1" Grid.Column="2">
-            <Image Source="/34609919_petridish1 (2).jpg" Width="200" Stretch="Uniform"></Image>
+            <Image Name="Dish_picture" Source="/34609919_petridish1 (2).jpg" Width="200" Stretch="Uniform"></Image>
         </GroupBox>
 
 
