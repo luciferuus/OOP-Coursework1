@@ -37,26 +37,75 @@ namespace OOP_Prog
     {
         public enum TimerStates
         {
-            Stopped,
-            Running
+            Limited,
+            Limitless
         }
 
-        public TimerStates State { get; }
+        public struct Time
+        {
+            int Days;
+            int Hours;
+            int Minutes;
+            int Seconds;
+
+            public static Time operator --(Time a)
+            {
+                if (a.Seconds > 0) { a.Seconds--; }
+                while (true)
+                {
+                    if (a.Hours == 0)
+                    {
+                        a.Days--;
+                        a.Hours = 23;
+                    }
+                    else if (a.Minutes == 0)
+                    {
+                        a.Hours--;
+                        a.Minutes = 59;
+                    }
+                    else if (a.Seconds == 0)
+                    {
+                        a.Minutes--;
+                        a.Seconds = 59;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                return a;
+            }
+        }
+
+        public TimerStates state { get; private set; }
+
+        private Time time { get; set; }
+
         DispatcherTimer dispatcherTimer;
 
-        public Timer(int seconds)
+        public Timer()
         {
-
+            state = TimerStates.Limitless;
+            Initialize();
         }
 
         public Timer(int value, TimeMeasures measure)
         {
-
+            state = TimerStates.Limited;
+            Initialize();
         }
 
         public void Tick(object sender, EventArgs e)
         {
 
+        }
+
+        private void Initialize()
+        {
+            
+            dispatcherTimer = new DispatcherTimer();
+            dispatcherTimer.Tick += Tick;
+            dispatcherTimer.Interval = new TimeSpan(1);
         }
     }
 
