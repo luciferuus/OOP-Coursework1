@@ -25,47 +25,46 @@
             <DockPanel>
                 <GroupBox Header="Main controls">
                     <StackPanel HorizontalAlignment="Center">
-                        <Button Margin="3" Name="ButtonStart">Start</Button>
+                        <Button Width="70" Margin="3" Name="ButtonStart">Start</Button>
                         <Button Margin="3" Name="ButtonStop">Stop</Button>
                     </StackPanel>
                 </GroupBox>
                 <GroupBox Header="TimeExp™">
-                <StackPanel>
-                    <DockPanel>
-                        <Label>Run for</Label>
-                        <TextBox Margin="3" MinWidth="15" Name="TextboxExperimentTime"></TextBox>
-                            <ComboBox Name="ComboboxTimeMode" SelectedIndex="0">
+                    <StackPanel>
+                        <DockPanel>
+                            <Label Margin="3" >Run for</Label>
+                            <TextBox Height="26" Margin="3" MinWidth="15" Name="TextboxExperimentTime"></TextBox>
+                            <ComboBox Margin="3" Name="ComboboxTimeMode" SelectedIndex="0">
                                 <ComboBoxItem>seconds</ComboBoxItem>
                                 <ComboBoxItem>minutes</ComboBoxItem>
                                 <ComboBoxItem>hours</ComboBoxItem>
                                 <ComboBoxItem>days</ComboBoxItem>
                             </ComboBox>
-                    </DockPanel>
+                        </DockPanel>
                         <Button Margin="3" Name="ButtonStartTimed">Start</Button>
                     </StackPanel>
                 </GroupBox>
             </DockPanel>
         </StackPanel>
-        
-     
-        <StackPanel Grid.Row="1" Grid.Column="1">
-            <DockPanel>
-                <Label>Viruses: </Label>
-                <Label Name="LabelVirusCount" Foreground="Red">0</Label>
-            </DockPanel>
-            <DockPanel>
-                <Label>Bacterias: </Label>
-                <Label Name="LabelBacteriaCount" Foreground="Green">0</Label>
-            </DockPanel>
-            <DockPanel>
-                <Label>Fungus: </Label>
-                <Label Name="LabelFungiCount" Foreground="Blue">0</Label>
-            </DockPanel>
-        </StackPanel>
+
+        <GroupBox Header="Organisms" Grid.Row="1" Grid.Column="1">
+            <StackPanel VerticalAlignment="Center" Grid.Row="1" Grid.Column="1">
+                <DockPanel>
+                    <Label>Viruses:</Label>
+                    <Label Name="LabelVirusCount" Foreground="Red">0</Label>
+                </DockPanel>
+                <DockPanel>
+                    <Label>Bacterias:</Label>
+                    <Label Name="LabelBacteriaCount" Foreground="Green">0</Label>
+                </DockPanel>
+                <DockPanel>
+                    <Label>Fungus:</Label>
+                    <Label Name="LabelFungiCount" Foreground="Blue">0</Label>
+                </DockPanel>
+            </StackPanel>
+        </GroupBox>
         <GroupBox Header="PetriLive™ Cam" Grid.Row="1" Grid.Column="2">
             <Image Name="Dish_picture" Source="/34609919_petridish1 (2).jpg" Width="200" Stretch="Uniform"></Image>
         </GroupBox>
-
-
     </Grid>
 </Window>
