@@ -49,199 +49,201 @@ namespace OOP_Prog
             timer.Terminate();
             timer.Dispatcher.Tick -= new EventHandler(this.UpdateTimeTrackers);
         }
-    }
 
-    public class Timer
-    {
-        public enum TimerStates
+        #region Classes
+
+        public class Timer
         {
-            Limited,
-            Limitless
-        }
-
-        public struct Time //Stores days, hours, minutes and seconds
-        {
-            int Days;
-            int Hours;
-            int Minutes;
-            int Seconds;
-
-            public Time(int D, int H, int M, int S)
+            public enum TimerStates
             {
-                Days = D;
-                Hours = H;
-                Minutes = M;
-                Seconds = S;
+                Limited,
+                Limitless
             }
 
-            public static Time operator --(Time a) //Decrease by 1 second
+            public struct Time //Stores days, hours, minutes and seconds
             {
-                a.Seconds--;
-                while (true)
+                int Days;
+                int Hours;
+                int Minutes;
+                int Seconds;
+
+                public Time(int D, int H, int M, int S)
                 {
-                    if (a.Hours == 0)
+                    Days = D;
+                    Hours = H;
+                    Minutes = M;
+                    Seconds = S;
+                }
+
+                public static Time operator --(Time a) //Decrease by 1 second
+                {
+                    a.Seconds--;
+                    while (true)
                     {
-                        a.Days--; a.Hours = 23;
+                        if (a.Hours == 0)
+                        {
+                            a.Days--; a.Hours = 23;
+                        }
+                        else if (a.Minutes == 0)
+                        {
+                            a.Hours--; a.Minutes = 59;
+                        }
+                        else if (a.Seconds == 0)
+                        {
+                            a.Minutes--; a.Seconds = 59;
+                        }
+                        else
+                        {
+                            break;
+                        }
                     }
-                    else if (a.Minutes == 0)
+                    return a;
+                }
+
+                public static Time operator ++(Time a) //Increase by 1 second
+                {
+                    a.Seconds++;
+                    while (true)
                     {
-                        a.Hours--; a.Minutes = 59;
+                        if (a.Seconds == 60)
+                        {
+                            a.Seconds = 0; a.Minutes++;
+                        }
+                        else if (a.Minutes == 60)
+                        {
+                            a.Minutes = 0; a.Hours++;
+                        }
+                        else if (a.Hours == 24)
+                        {
+                            a.Hours = 0; a.Days++;
+                        }
+                        else
+                        {
+                            break;
+                        }
                     }
-                    else if (a.Seconds == 0)
+                    return a;
+                }
+
+                public override string ToString()
+                {
+                    return $"{TStr(Days)}:{TStr(Hours)}:{TStr(Minutes)}:{TStr(Seconds)}";
+                }
+
+                private string TStr(int val) //Used in ToString() to output components of time in conventional way
+                {
+                    if (val < 10)
                     {
-                        a.Minutes--; a.Seconds = 59;
+                        return "0" + val.ToString();
                     }
                     else
                     {
-                        break;
+                        return val.ToString();
                     }
                 }
-                return a;
             }
 
-            public static Time operator ++(Time a) //Increase by 1 second
+            public TimerStates State { get; private set; }
+
+            private Time Elapsed { get; set; }
+
+            private Time Estimated { get; set; }
+
+            public DispatcherTimer Dispatcher;
+
+            public Timer()
             {
-                a.Seconds++;
-                while (true)
+                State = TimerStates.Limitless;
+                Initialize();
+            }
+
+            public Timer(int value, TimeMeasures measure)
+            {
+                State = TimerStates.Limited;
+                Initialize();
+            }
+
+            private void Tick(object sender, EventArgs e)
+            {
+                Elapsed++;
+                switch (State)
                 {
-                    if (a.Seconds == 60)
-                    {
-                        a.Seconds = 0; a.Minutes++;
-                    }
-                    else if (a.Minutes == 60)
-                    {
-                        a.Minutes = 0; a.Hours++;
-                    }
-                    else if (a.Hours == 24)
-                    {
-                        a.Hours = 0; a.Days++;
-                    }
-                    else
-                    {
+                    case TimerStates.Limitless:
+
                         break;
-                    }
+
+                    case TimerStates.Limited:
+
+                        break;
                 }
-                return a;
             }
 
-            public override string ToString()
+            public string GetElapsed()
             {
-                return $"{TStr(Days)}:{TStr(Hours)}:{TStr(Minutes)}:{TStr(Seconds)}";
+                return Elapsed.ToString();
             }
 
-            private string TStr(int val) //Used in ToString() to output components of time in conventional way
+            public string GetEstimated()
             {
-                if (val < 10)
+                if (State == TimerStates.Limitless)
                 {
-                    return "0" + val.ToString();
+                    return "Infinity";
                 }
                 else
                 {
-                    return val.ToString();
+                    return Estimated.ToString();
+                }
+            }
+
+            public void Terminate()
+            {
+                Dispatcher.Stop();
+            }
+
+            private void Initialize() //Performes setup common for all types of timers
+            {
+                Elapsed = new Time(0, 0, 0, 0);
+                Dispatcher = new DispatcherTimer();
+                Dispatcher.Tick += Tick;
+                Dispatcher.Interval = new TimeSpan(0, 0, 1);
+                Dispatcher.Start();
+            }
+        }
+
+        public class Experiment
+        {
+            public enum ExperimentStates
+            {
+                Stopped,
+                Running,
+                OnTimer
+            }
+
+            class Bacreria
+            {
+                public Bacreria()
+                {
+
+                }
+            }
+
+            class Virus
+            {
+                public Virus()
+                {
+
+                }
+            }
+
+            class Fungus
+            {
+                public Fungus()
+                {
+
                 }
             }
         }
 
-        public TimerStates State { get; private set; }
-
-        private Time Elapsed { get; set; }
-
-        private Time Estimated { get; set; }
-
-        public DispatcherTimer Dispatcher;
-
-        public Timer()
-        {
-            State = TimerStates.Limitless;
-            Initialize();
-        }
-
-        public Timer(int value, TimeMeasures measure)
-        {
-            State = TimerStates.Limited;
-            Initialize();
-        }
-
-        private void Tick(object sender, EventArgs e)
-        {
-            Elapsed++;
-            switch (State)
-            {
-                case TimerStates.Limitless:
-
-                    break;
-
-                case TimerStates.Limited:
-
-                    break;
-            }
-        }
-
-        public string GetElapsed()
-        {
-            return Elapsed.ToString();
-        }
-
-        public string GetEstimated()
-        {
-            if (State == TimerStates.Limitless)
-            {
-                return "Infinity";
-            }
-            else
-            {
-                return Estimated.ToString();
-            }
-        }
-
-        public void Terminate()
-        {
-            Dispatcher.Stop();
-        }
-
-        private void Initialize() //Performes setup common for all types of timers
-        {
-            Elapsed = new Time(0, 0, 0, 0);
-            Dispatcher = new DispatcherTimer();
-            Dispatcher.Tick += Tick;
-            Dispatcher.Interval = new TimeSpan(0, 0, 1);
-            Dispatcher.Start();
-        }
-    }
-
-
-
-    public class Experiment
-    {
-        public enum ExperimentStates
-        {
-            Stopped,
-            Running,
-            OnTimer
-        }
-
-        class Bacreria
-        {
-            public Bacreria()
-            {
-
-            }
-        }
-
-        class Virus
-        {
-            public Virus()
-            {
-
-            }
-        }
-
-        class Fungus
-        {
-            public Fungus()
-            {
-
-            }
-        }
+        #endregion
     }
 }
