@@ -21,12 +21,12 @@
         </Grid.RowDefinitions>
 
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2">
-            <Label HorizontalAlignment="Center" FontStyle="Oblique">Experiment control panel</Label>
+            <Label HorizontalAlignment="Center" FontStyle="Italic">Experiment control panel</Label>
             <DockPanel>
                 <GroupBox Header="Main controls">
                     <StackPanel HorizontalAlignment="Center">
-                        <Button Width="70" Margin="3" Name="ButtonStart">Start</Button>
-                        <Button Margin="3" Name="ButtonStop">Stop</Button>
+                        <Button Width="70" Margin="3" Name="ButtonStart" Click="ButtonStart_Click">Start</Button>
+                        <Button Margin="3" Name="ButtonStop" Click="ButtonStop_Click">Stop</Button>
                     </StackPanel>
                 </GroupBox>
                 <GroupBox Header="TimeExp™">
@@ -47,22 +47,34 @@
             </DockPanel>
         </StackPanel>
 
-        <GroupBox Header="Organisms" Grid.Row="1" Grid.Column="1">
-            <StackPanel VerticalAlignment="Center" Grid.Row="1" Grid.Column="1">
-                <DockPanel>
-                    <Label>Viruses:</Label>
-                    <Label Name="LabelVirusCount" Foreground="Red">0</Label>
-                </DockPanel>
-                <DockPanel>
-                    <Label>Bacterias:</Label>
-                    <Label Name="LabelBacteriaCount" Foreground="Green">0</Label>
-                </DockPanel>
-                <DockPanel>
-                    <Label>Fungus:</Label>
-                    <Label Name="LabelFungiCount" Foreground="Blue">0</Label>
-                </DockPanel>
-            </StackPanel>
-        </GroupBox>
+        <StackPanel VerticalAlignment="Stretch" Grid.Row="1" Grid.Column="1">
+            <GroupBox VerticalAlignment="Stretch" Header="Time stats">
+                <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Center">
+                    <Label HorizontalAlignment="Center">Elapsed:</Label>
+                    <TextBlock HorizontalAlignment="Center" Name="ElapsedLabel" Foreground="ForestGreen" FontStyle="Oblique">00:00:00:00</TextBlock>
+
+                    <Label HorizontalAlignment="Center">Estimated:</Label>
+                    <TextBlock HorizontalAlignment="Center" Name="EstimatedLabel" Foreground="Firebrick" FontStyle="Oblique">00:00:00:00</TextBlock>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox VerticalAlignment="Stretch" Header="Organisms" Grid.Row="1" Grid.Column="1">
+                <StackPanel VerticalAlignment="Stretch" Grid.Row="1" Grid.Column="1">
+                    <DockPanel>
+                        <Label>Viruses:</Label>
+                        <Label Name="LabelVirusCount" Foreground="Red">0</Label>
+                    </DockPanel>
+                    <DockPanel>
+                        <Label>Bacterias:</Label>
+                        <Label Name="LabelBacteriaCount" Foreground="Green">0</Label>
+                    </DockPanel>
+                    <DockPanel>
+                        <Label>Fungus:</Label>
+                        <Label Name="LabelFungiCount" Foreground="Blue">0</Label>
+                    </DockPanel>
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
+
         <GroupBox Header="PetriLive™ Cam" Grid.Row="1" Grid.Column="2">
             <Image Source="/dishpic.jpg"></Image>
         </GroupBox>

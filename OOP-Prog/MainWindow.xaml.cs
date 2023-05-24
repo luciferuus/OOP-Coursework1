@@ -26,10 +26,28 @@ namespace OOP_Prog
 
     public partial class MainWindow : Window
     {
+        Timer timer;
         public MainWindow()
         {
             InitializeComponent();
+        }
 
+        private void UpdateTimeTrackers(object sender, EventArgs e)
+        {
+            ElapsedLabel.Text = timer.GetElapsed();
+            EstimatedLabel.Text = timer.GetEstimated();
+        }
+
+        private void ButtonStart_Click(object sender, RoutedEventArgs e)
+        {
+            timer = new Timer();
+            timer.Dispatcher.Tick += new EventHandler(this.UpdateTimeTrackers);
+        }
+
+        private void ButtonStop_Click(object sender, RoutedEventArgs e)
+        {
+            timer.Terminate();
+            timer.Dispatcher.Tick -= new EventHandler(this.UpdateTimeTrackers);
         }
     }
 
@@ -41,32 +59,37 @@ namespace OOP_Prog
             Limitless
         }
 
-        public struct Time
+        public struct Time //Stores days, hours, minutes and seconds
         {
             int Days;
             int Hours;
             int Minutes;
             int Seconds;
 
-            public static Time operator --(Time a)
+            public Time(int D, int H, int M, int S)
             {
-                if (a.Seconds > 0) { a.Seconds--; }
+                Days = D;
+                Hours = H;
+                Minutes = M;
+                Seconds = S;
+            }
+
+            public static Time operator --(Time a) //Decrease by 1 second
+            {
+                a.Seconds--;
                 while (true)
                 {
                     if (a.Hours == 0)
                     {
-                        a.Days--;
-                        a.Hours = 23;
+                        a.Days--; a.Hours = 23;
                     }
                     else if (a.Minutes == 0)
                     {
-                        a.Hours--;
-                        a.Minutes = 59;
+                        a.Hours--; a.Minutes = 59;
                     }
                     else if (a.Seconds == 0)
                     {
-                        a.Minutes--;
-                        a.Seconds = 59;
+                        a.Minutes--; a.Seconds = 59;
                     }
                     else
                     {
@@ -75,39 +98,118 @@ namespace OOP_Prog
                 }
                 return a;
             }
+
+            public static Time operator ++(Time a) //Increase by 1 second
+            {
+                a.Seconds++;
+                while (true)
+                {
+                    if (a.Seconds == 60)
+                    {
+                        a.Seconds = 0; a.Minutes++;
+                    }
+                    else if (a.Minutes == 60)
+                    {
+                        a.Minutes = 0; a.Hours++;
+                    }
+                    else if (a.Hours == 24)
+                    {
+                        a.Hours = 0; a.Days++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                return a;
+            }
+
+            public override string ToString()
+            {
+                return $"{TStr(Days)}:{TStr(Hours)}:{TStr(Minutes)}:{TStr(Seconds)}";
+            }
+
+            private string TStr(int val) //Used in ToString() to output components of time in conventional way
+            {
+                if (val < 10)
+                {
+                    return "0" + val.ToString();
+                }
+                else
+                {
+                    return val.ToString();
+                }
+            }
         }
 
-        public TimerStates state { get; private set; }
+        public TimerStates State { get; private set; }
 
-        private Time time { get; set; }
+        private Time Elapsed { get; set; }
 
-        DispatcherTimer dispatcherTimer;
+        private Time Estimated { get; set; }
+
+        public DispatcherTimer Dispatcher;
 
         public Timer()
         {
-            state = TimerStates.Limitless;
+            State = TimerStates.Limitless;
             Initialize();
         }
 
         public Timer(int value, TimeMeasures measure)
         {
-            state = TimerStates.Limited;
+            State = TimerStates.Limited;
             Initialize();
         }
 
-        public void Tick(object sender, EventArgs e)
+        private void Tick(object sender, EventArgs e)
         {
+            Elapsed++;
+            switch (State)
+            {
+                case TimerStates.Limitless:
 
+                    break;
+
+                case TimerStates.Limited:
+
+                    break;
+            }
         }
 
-        private void Initialize()
+        public string GetElapsed()
         {
-            
-            dispatcherTimer = new DispatcherTimer();
-            dispatcherTimer.Tick += Tick;
-            dispatcherTimer.Interval = new TimeSpan(1);
+            return Elapsed.ToString();
+        }
+
+        public string GetEstimated()
+        {
+            if (State == TimerStates.Limitless)
+            {
+                return "Infinity";
+            }
+            else
+            {
+                return Estimated.ToString();
+            }
+        }
+
+        public void Terminate()
+        {
+            Dispatcher.Stop();
+        }
+
+        private void Initialize() //Performes setup common for all types of timers
+        {
+            Elapsed = new Time(0, 0, 0, 0);
+            Dispatcher = new DispatcherTimer();
+            Dispatcher.Tick += Tick;
+            Dispatcher.Interval = new TimeSpan(0, 0, 1);
+            Dispatcher.Start();
         }
     }
+
+
 
     public class Experiment
     {
@@ -116,6 +218,30 @@ namespace OOP_Prog
             Stopped,
             Running,
             OnTimer
+        }
+
+        class Bacreria
+        {
+            public Bacreria()
+            {
+
+            }
+        }
+
+        class Virus
+        {
+            public Virus()
+            {
+
+            }
+        }
+
+        class Fungus
+        {
+            public Fungus()
+            {
+
+            }
         }
     }
 }
