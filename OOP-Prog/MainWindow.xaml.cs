@@ -26,7 +26,9 @@ namespace OOP_Prog
 
     public partial class MainWindow : Window
     {
+        public bool ActiveTimer = false;
         Timer timer;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -40,14 +42,22 @@ namespace OOP_Prog
 
         private void ButtonStart_Click(object sender, RoutedEventArgs e)
         {
-            timer = new Timer();
-            timer.Dispatcher.Tick += new EventHandler(this.UpdateTimeTrackers);
+            if (ActiveTimer == false)
+            {
+                ActiveTimer = true;
+                timer = new Timer();
+                timer.Dispatcher.Tick += new EventHandler(this.UpdateTimeTrackers);
+            }
         }
 
         private void ButtonStop_Click(object sender, RoutedEventArgs e)
         {
-            timer.Terminate();
-            timer.Dispatcher.Tick -= new EventHandler(this.UpdateTimeTrackers);
+            if(ActiveTimer == true)
+            {
+                ActiveTimer = false;
+                timer.Terminate();
+                timer.Dispatcher.Tick -= new EventHandler(this.UpdateTimeTrackers);
+            }
         }
 
         #region Classes
