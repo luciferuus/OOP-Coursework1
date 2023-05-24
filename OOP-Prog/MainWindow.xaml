@@ -25,8 +25,8 @@
             <DockPanel>
                 <GroupBox Header="Main controls">
                     <StackPanel HorizontalAlignment="Center">
-                        <Button Width="70" Margin="3" Name="ButtonStart" Click="ButtonStart_Click">Start</Button>
-                        <Button Margin="3" Name="ButtonStop" Click="ButtonStop_Click">Stop</Button>
+                        <Button Width="70" Margin="3" Name="ButtonStart" Click="Start_Click">Start</Button>
+                        <Button Margin="3" Name="ButtonStop" Click="Stop_Click">Stop</Button>
                     </StackPanel>
                 </GroupBox>
                 <GroupBox Header="TimeExp™">

@@ -40,7 +40,7 @@ namespace OOP_Prog
             EstimatedLabel.Text = timer.GetEstimated();
         }
 
-        private void ButtonStart_Click(object sender, RoutedEventArgs e)
+        private void Start_Click(object sender, RoutedEventArgs e)
         {
             if (ActiveTimer == false)
             {
@@ -50,7 +50,7 @@ namespace OOP_Prog
             }
         }
 
-        private void ButtonStop_Click(object sender, RoutedEventArgs e)
+        private void Stop_Click(object sender, RoutedEventArgs e)
         {
             if(ActiveTimer == true)
             {
