@@ -68,7 +68,7 @@
                         <Label Name="LabelBacteriaCount" Foreground="Green">0</Label>
                     </DockPanel>
                     <DockPanel>
-                        <Label>Fungus:</Label>
+                        <Label>Fungi:</Label>
                         <Label Name="LabelFungiCount" Foreground="Blue">0</Label>
                     </DockPanel>
                 </StackPanel>

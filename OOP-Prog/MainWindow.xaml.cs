@@ -274,6 +274,7 @@ namespace OOP_Prog
 
         public class Experiment
         {
+            ExperimentStates State;
             public enum ExperimentStates
             {
                 Stopped,
@@ -281,35 +282,49 @@ namespace OOP_Prog
                 OnTimer
             }
 
-            
-
-            class Bacreria : Organism
+            public enum Species
             {
-                public Bacreria()
-                {
-
-                }
+                Bacteria = 1,
+                Virus = 2,
+                Fungus = 3
             }
 
-            class Virus : Organism
-            {
-                public Virus()
-                {
+            public OrganismTracker Bacterias;
+            public OrganismTracker Viruses;
+            public OrganismTracker Fungi;
 
-                }
+            Experiment()
+            {
+                Bacterias = new OrganismTracker(Species.Bacteria);
+                Viruses = new OrganismTracker(Species.Virus);
+                Fungi = new OrganismTracker(Species.Fungus);
             }
 
-            class Fungus : Organism
+
+            public class OrganismTracker
             {
-                public Fungus()
+                public Species Species;
+                int Population;
+                private int TickTracker = 0;
+
+                public OrganismTracker(Species species )
                 {
-
+                    this.Species = species;
+                    Population = 1;
                 }
-            }
 
-            class Organism
-            {
-
+                void Multiply()
+                {
+                    Population *= 2;
+                }
+                public void Tick()
+                {
+                    TickTracker++;
+                    if(TickTracker == (int)Species) {
+                        TickTracker = 0;
+                        Multiply();
+                    }
+                }
             }
         }
 
