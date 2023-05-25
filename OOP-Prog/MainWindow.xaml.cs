@@ -29,10 +29,13 @@ namespace OOP_Prog
     {
         public bool ActiveTimer = false;
         Timer timer;
+        DispatcherTimer UIupdater = new DispatcherTimer();
 
         public MainWindow()
         {
             InitializeComponent();
+            UIupdater.Tick += UpdateTimeTrackers;
+            UIupdater.Interval = new TimeSpan(1000);
         }
 
         public void UpdateTimeTrackers(object sender, EventArgs e)
@@ -47,7 +50,7 @@ namespace OOP_Prog
             {
                 ActiveTimer = true;
                 timer = new Timer();
-                timer.Tick.Elapsed += UpdateTimeTrackers;
+                UIupdater.Start();
             }
         }
 
@@ -57,7 +60,7 @@ namespace OOP_Prog
             {
                 ActiveTimer = false;
                 timer.Terminate();
-                timer.Tick.Elapsed -= UpdateTimeTrackers;
+                UIupdater.Stop();
             }
         }
 
