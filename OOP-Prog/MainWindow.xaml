@@ -41,7 +41,7 @@
                                 <ComboBoxItem>days</ComboBoxItem>
                             </ComboBox>
                         </DockPanel>
-                        <Button Margin="3" Name="ButtonStartTimed">Start</Button>
+                        <Button Margin="3" Name="ButtonStartTimed" Click="StartTimed_Click">Start</Button>
                     </StackPanel>
                 </GroupBox>
             </DockPanel>
@@ -61,15 +61,15 @@
                 <StackPanel VerticalAlignment="Stretch" Grid.Row="1" Grid.Column="1">
                     <DockPanel>
                         <Label>Viruses:</Label>
-                        <Label Name="LabelVirusCount" Foreground="Red">0</Label>
+                        <TextBlock VerticalAlignment="Center" Name="LabelVirusCount" Foreground="Red">0</TextBlock>
                     </DockPanel>
                     <DockPanel>
                         <Label>Bacterias:</Label>
-                        <Label Name="LabelBacteriaCount" Foreground="Green">0</Label>
+                        <TextBlock VerticalAlignment="Center" Name="LabelBacteriaCount" Foreground="Green">0</TextBlock>
                     </DockPanel>
                     <DockPanel>
                         <Label>Fungi:</Label>
-                        <Label Name="LabelFungiCount" Foreground="Blue">0</Label>
+                        <TextBlock VerticalAlignment="Center" Name="LabelFungiCount" Foreground="Blue">0</TextBlock>
                     </DockPanel>
                 </StackPanel>
             </GroupBox>
