@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -70,6 +71,8 @@ namespace OOP_Prog
                 Limitless
             }
 
+            int counter = 0;
+
             public struct Time //Stores days, hours, minutes and seconds
             {
                 int Days;
@@ -135,6 +138,31 @@ namespace OOP_Prog
                     return a;
                 }
 
+                /*
+                public static bool operator ==(Time a, Time b)
+                {
+                    if((a.Days == b.Days) && (a.Hours == b.Hours) && (a.Minutes == b.Minutes) && (a.Seconds == b.Seconds))
+                    {
+                        return true;
+                    } else
+                    {
+                        return false;
+                    }
+                }
+
+                public static bool operator !=(Time a, Time b)
+                {
+                    if ((a.Days == b.Days) && (a.Hours == b.Hours) && (a.Minutes == b.Minutes) && (a.Seconds == b.Seconds))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+                */
+
                 public override string ToString()
                 {
                     return $"{TStr(Days)}:{TStr(Hours)}:{TStr(Minutes)}:{TStr(Seconds)}";
@@ -159,7 +187,7 @@ namespace OOP_Prog
 
             private Time Estimated { get; set; }
 
-            public DispatcherTimer Dispatcher;
+            public System.Threading.Timer TimerThread;
 
             public Timer()
             {
@@ -170,12 +198,32 @@ namespace OOP_Prog
             public Timer(int value, TimeMeasures measure)
             {
                 State = TimerStates.Limited;
+                switch (measure)
+                {
+                    case TimeMeasures.Seconds:
+                        Estimated = new Time(0, 0, 0, value);
+                        break;
+
+                    case TimeMeasures.Minutes:
+                        Estimated = new Time(0, 0, value, 0);
+                        break;
+
+                    case TimeMeasures.Hours:
+                        Estimated = new Time(0, value, 0, 0);
+                        break;
+
+                    case TimeMeasures.Days:
+                        Estimated = new Time(value,0,0,0);
+                        break;
+                }
                 Initialize();
             }
 
-            private void Tick(object sender, EventArgs e)
+            private void InternalTick()
             {
+                Time Zero = new Time(0, 0, 0, 0);
                 Elapsed++;
+                counter++;
                 switch (State)
                 {
                     case TimerStates.Limitless:
@@ -183,7 +231,13 @@ namespace OOP_Prog
                         break;
 
                     case TimerStates.Limited:
-
+                        if(Estimated.Equals(Zero))
+                        {
+                            this.Terminate();
+                        } else
+                        {
+                            Estimated--;
+                        }
                         break;
                 }
             }
@@ -207,16 +261,13 @@ namespace OOP_Prog
 
             public void Terminate()
             {
-                Dispatcher.Stop();
+                TimerThread.Dispose();
             }
 
             private void Initialize() //Performes setup common for all types of timers
             {
                 Elapsed = new Time(0, 0, 0, 0);
-                Dispatcher = new DispatcherTimer();
-                Dispatcher.Tick += Tick;
-                Dispatcher.Interval = new TimeSpan(0, 0, 1);
-                Dispatcher.Start();
+                TimerThread = new System.Threading.Timer(TimerThread => InternalTick(), null, 0, 1000);
             }
         }
 
@@ -229,7 +280,9 @@ namespace OOP_Prog
                 OnTimer
             }
 
-            class Bacreria
+            
+
+            class Bacreria : Organism
             {
                 public Bacreria()
                 {
@@ -237,7 +290,7 @@ namespace OOP_Prog
                 }
             }
 
-            class Virus
+            class Virus : Organism
             {
                 public Virus()
                 {
@@ -245,12 +298,17 @@ namespace OOP_Prog
                 }
             }
 
-            class Fungus
+            class Fungus : Organism
             {
                 public Fungus()
                 {
 
                 }
+            }
+
+            class Organism
+            {
+
             }
         }
 
