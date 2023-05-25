@@ -47,7 +47,7 @@ namespace OOP_Prog
             {
                 ActiveTimer = true;
                 timer = new Timer();
-                timer.Tick += UpdateTimeTrackers;
+                timer.Tick.Elapsed += UpdateTimeTrackers;
             }
         }
 
@@ -57,7 +57,7 @@ namespace OOP_Prog
             {
                 ActiveTimer = false;
                 timer.Terminate();
-                timer.Tick -= UpdateTimeTrackers;
+                timer.Tick.Elapsed -= UpdateTimeTrackers;
             }
         }
 
@@ -185,9 +185,7 @@ namespace OOP_Prog
 
             private Time Estimated { get; set; }
 
-            public System.Threading.Timer TimerThread;
-
-            public EventHandler Tick;
+            public System.Timers.Timer Tick;
 
             private Time Zero = new Time(0, 0, 0, 0);
 
@@ -261,14 +259,16 @@ namespace OOP_Prog
 
             public void Terminate()
             {
-                TimerThread.Dispose();
+                Tick.Stop();
             }
 
             private void Initialize() //Performes setup common for all types of timers
             {
                 Elapsed = new Time(0, 0, 0, 0);
-                TimerThread = new System.Threading.Timer(callback => Tick.Invoke(this, null), null, 0, 100);
-                Tick += InternalTick;
+                Tick = new System.Timers.Timer(1000);
+                Tick.Elapsed += InternalTick;
+                Tick.AutoReset = true;
+                Tick.Start();
             }
         }
 
