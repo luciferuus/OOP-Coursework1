@@ -35,7 +35,7 @@ namespace OOP_Prog
             InitializeComponent();
         }
 
-        private void UpdateTimeTrackers(object sender, EventArgs e)
+        public void UpdateTimeTrackers(object sender, EventArgs e)
         {
             ElapsedLabel.Text = timer.GetElapsed();
             EstimatedLabel.Text = timer.GetEstimated();
@@ -47,7 +47,7 @@ namespace OOP_Prog
             {
                 ActiveTimer = true;
                 timer = new Timer();
-                timer.Dispatcher.Tick += new EventHandler(this.UpdateTimeTrackers);
+                timer.Tick += UpdateTimeTrackers;
             }
         }
 
@@ -57,7 +57,7 @@ namespace OOP_Prog
             {
                 ActiveTimer = false;
                 timer.Terminate();
-                timer.Dispatcher.Tick -= new EventHandler(this.UpdateTimeTrackers);
+                timer.Tick -= UpdateTimeTrackers;
             }
         }
 
@@ -70,8 +70,6 @@ namespace OOP_Prog
                 Limited,
                 Limitless
             }
-
-            int counter = 0;
 
             public struct Time //Stores days, hours, minutes and seconds
             {
@@ -189,6 +187,10 @@ namespace OOP_Prog
 
             public System.Threading.Timer TimerThread;
 
+            public EventHandler Tick;
+
+            private Time Zero = new Time(0, 0, 0, 0);
+
             public Timer()
             {
                 State = TimerStates.Limitless;
@@ -219,11 +221,9 @@ namespace OOP_Prog
                 Initialize();
             }
 
-            private void InternalTick()
+            private void InternalTick(object sender, EventArgs e)
             {
-                Time Zero = new Time(0, 0, 0, 0);
                 Elapsed++;
-                counter++;
                 switch (State)
                 {
                     case TimerStates.Limitless:
@@ -267,7 +267,8 @@ namespace OOP_Prog
             private void Initialize() //Performes setup common for all types of timers
             {
                 Elapsed = new Time(0, 0, 0, 0);
-                TimerThread = new System.Threading.Timer(TimerThread => InternalTick(), null, 0, 1000);
+                TimerThread = new System.Threading.Timer(callback => Tick.Invoke(this, null), null, 0, 100);
+                Tick += InternalTick;
             }
         }
 
