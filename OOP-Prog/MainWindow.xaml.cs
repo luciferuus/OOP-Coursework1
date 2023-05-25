@@ -29,13 +29,10 @@ namespace OOP_Prog
     {
         public bool ActiveTimer = false;
         Timer timer;
-        DispatcherTimer UIupdater = new DispatcherTimer();
 
         public MainWindow()
         {
             InitializeComponent();
-            UIupdater.Tick += UpdateTimeTrackers;
-            UIupdater.Interval = new TimeSpan(1000);
         }
 
         public void UpdateTimeTrackers(object sender, EventArgs e)
@@ -49,8 +46,8 @@ namespace OOP_Prog
             if (ActiveTimer == false)
             {
                 ActiveTimer = true;
-                timer = new Timer();
-                UIupdater.Start();
+                timer = new Timer(30, TimeMeasures.Seconds);
+                CompositionTarget.Rendering += UpdateTimeTrackers;
             }
         }
 
@@ -60,7 +57,7 @@ namespace OOP_Prog
             {
                 ActiveTimer = false;
                 timer.Terminate();
-                UIupdater.Stop();
+                CompositionTarget.Rendering -= UpdateTimeTrackers;
             }
         }
 
@@ -91,32 +88,31 @@ namespace OOP_Prog
 
                 public static Time operator --(Time a) //Decrease by 1 second
                 {
-                    a.Seconds--;
                     while (true)
                     {
-                        if (a.Hours == 0)
+                        if (a.Seconds == 0 && a.Minutes > 0)
                         {
-                            a.Days--; a.Hours = 23;
+                            a.Seconds = 60; a.Minutes--;
                         }
-                        else if (a.Minutes == 0)
+                        else if (a.Minutes == 0 && a.Hours > 0)
                         {
-                            a.Hours--; a.Minutes = 59;
+                            a.Minutes = 59; a.Hours--;
                         }
-                        else if (a.Seconds == 0)
+                        else if (a.Hours == 0 && a.Days > 0)
                         {
-                            a.Minutes--; a.Seconds = 59;
+                            a.Hours = 23; a.Days--;
                         }
                         else
                         {
                             break;
                         }
                     }
+                    a.Seconds--;
                     return a;
                 }
 
                 public static Time operator ++(Time a) //Increase by 1 second
                 {
-                    a.Seconds++;
                     while (true)
                     {
                         if (a.Seconds == 60)
@@ -136,6 +132,7 @@ namespace OOP_Prog
                             break;
                         }
                     }
+                    a.Seconds++;
                     return a;
                 }
 
@@ -224,7 +221,6 @@ namespace OOP_Prog
 
             private void InternalTick(object sender, EventArgs e)
             {
-                Elapsed++;
                 switch (State)
                 {
                     case TimerStates.Limitless:
@@ -241,6 +237,7 @@ namespace OOP_Prog
                         }
                         break;
                 }
+                Elapsed++;
             }
 
             public string GetElapsed()
