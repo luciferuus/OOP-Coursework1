@@ -28,14 +28,56 @@ namespace OOP_Prog
 
     public partial class MainWindow : Window
     {
-        public bool ActiveTimer = false;
         Timer timer;
         Experiment experiment;
+        WriteableBitmap bitCanvas;
 
         public MainWindow()
         {
             InitializeComponent();
+            
         }
+
+        #region Button events
+
+        private void Start_Click(object sender, EventArgs e)
+        {
+            if (timer == null || timer.State == Timer.TimerStates.Stopped)
+            {
+                timer = new Timer();
+                experiment = new Experiment(Experiment.ExperimentStates.Running);
+                bitCanvas = new WriteableBitmap((int)DishPic.ActualHeight, (int)DishPic.ActualWidth, 100, 100, PixelFormats.Rgb24, null);
+                DishPic.Source = bitCanvas;
+                EventsSubscribe();
+            }
+        }
+
+        private void StartTimed_Click(object sender, EventArgs e)
+        {
+            TextboxExperimentTime.BorderBrush = Brushes.Gray;
+            if (timer == null || timer.State == Timer.TimerStates.Stopped)
+            {
+                if (GetTextboxInput() != null)
+                {
+                    timer = new Timer((int)GetTextboxInput(), (TimeMeasures)ComboboxTimeMode.SelectedIndex);
+                    experiment = new Experiment(Experiment.ExperimentStates.Running);
+                    DishPic.Source = new WriteableBitmap((int)DishPic.ActualHeight, (int)DishPic.ActualWidth, 100, 100, PixelFormats.Rgb24, null);
+                    EventsSubscribe();
+                }
+
+            }
+        }
+
+        private void Stop_Click(object sender, EventArgs e)
+        {
+            if (timer != null && timer.State != Timer.TimerStates.Stopped)
+            {
+                timer.Stop();
+                EventsUnsubscribe();
+            }
+        }
+
+        #endregion
 
         public void UpdateTimeTrackers(object sender, EventArgs e)
         {
@@ -45,23 +87,45 @@ namespace OOP_Prog
 
         public void UpdateOrganismLabels(object sender, EventArgs e)
         {
-            LabelBacteriaCount.Text = experiment.Bacterias.Population.ToString();
-            LabelVirusCount.Text = experiment.Viruses.Population.ToString();
-            LabelFungiCount.Text = experiment.Fungi.Population.ToString();
+            LabelBacteriaCount.Text = experiment.organismTrackers[0].Population.ToString();
+            LabelVirusCount.Text = experiment.organismTrackers[1].Population.ToString();
+            LabelFungiCount.Text = experiment.organismTrackers[2].Population.ToString();
+        }
+
+        public void DrawDish(object sender, EventArgs e)
+        {
+            Random rnd = new Random();
+            bitCanvas = new WriteableBitmap((int)DishPic.ActualHeight, (int)DishPic.ActualWidth, 100, 100, PixelFormats.Rgb24, null);
+            bitCanvas.Lock();
+            int Column;
+            int Row;
+            foreach (Experiment.OrganismTracker ot in experiment.organismTrackers)
+            {
+                for(int i = 0; i < ot.Population; i++)
+                {
+                    unsafe
+                    {
+                        IntPtr pBackBuffer = bitCanvas.BackBuffer;
+                        Column = rnd.Next(0, bitCanvas.PixelHeight);
+                        Row = rnd.Next(0, bitCanvas.PixelWidth);
+                        pBackBuffer += Column;
+                        pBackBuffer += Row;
+                        int ColorToDraw = ot.ColorData[0] << 16;
+                        ColorToDraw |= ot.ColorData[1] << 8;
+                        ColorToDraw |= ot.ColorData[2] << 0;
+                        *((int*)pBackBuffer) = ColorToDraw;
+                    }
+                    bitCanvas.AddDirtyRect(new Int32Rect(Column, Row, 1, 1));
+                }
+            }
+            bitCanvas.Unlock();
         }
 
         public void TimerExecutioner(object sender, EventArgs e)
         {
             if(timer.State == Timer.TimerStates.Stopped)
             {
-                timer.Terminate();
-                timer.Tick.Elapsed -= experiment.Bacterias.Tick;
-                timer.Tick.Elapsed -= experiment.Viruses.Tick;
-                timer.Tick.Elapsed -= experiment.Fungi.Tick;
-                CompositionTarget.Rendering -= UpdateTimeTrackers;
-                CompositionTarget.Rendering -= UpdateOrganismLabels;
-                CompositionTarget.Rendering -= TimerExecutioner;
-                ActiveTimer = false;
+                timer.Stop();
             }
         }
 
@@ -84,54 +148,28 @@ namespace OOP_Prog
             return input;
         }
 
-        private void Start_Click(object sender, EventArgs e)
+        private void EventsSubscribe()
         {
-            if (ActiveTimer == false)
+            foreach (Experiment.OrganismTracker ot in experiment.organismTrackers)
             {
-                ActiveTimer = true;
-                timer = new Timer();
-                experiment = new Experiment(Experiment.ExperimentStates.Running);
-                timer.Tick.Elapsed += experiment.Bacterias.Tick;
-                timer.Tick.Elapsed += experiment.Viruses.Tick;
-                timer.Tick.Elapsed += experiment.Fungi.Tick;
-                CompositionTarget.Rendering += UpdateTimeTrackers;
-                CompositionTarget.Rendering += UpdateOrganismLabels;
+                timer.Tick.Elapsed += ot.Tick;
             }
+            CompositionTarget.Rendering += UpdateTimeTrackers;
+            CompositionTarget.Rendering += UpdateOrganismLabels;
+            CompositionTarget.Rendering += TimerExecutioner;
+            CompositionTarget.Rendering += DrawDish;
         }
 
-        private void StartTimed_Click(object sender, EventArgs e)
+        private void EventsUnsubscribe()
         {
-            TextboxExperimentTime.BorderBrush = Brushes.Gray;
-            if (ActiveTimer == false)
+            foreach(Experiment.OrganismTracker ot in experiment.organismTrackers)
             {
-                if (GetTextboxInput() != null)
-                {
-                    ActiveTimer = true;
-                    timer = new Timer((int)GetTextboxInput(), (TimeMeasures)ComboboxTimeMode.SelectedIndex);
-                    experiment = new Experiment(Experiment.ExperimentStates.Running);
-                    timer.Tick.Elapsed += experiment.Bacterias.Tick;
-                    timer.Tick.Elapsed += experiment.Viruses.Tick;
-                    timer.Tick.Elapsed += experiment.Fungi.Tick;
-                    CompositionTarget.Rendering += UpdateTimeTrackers;
-                    CompositionTarget.Rendering += UpdateOrganismLabels;
-                    CompositionTarget.Rendering += TimerExecutioner;
-                }
-
+                timer.Tick.Elapsed -= ot.Tick;
             }
-        }
-
-        private void Stop_Click(object sender, EventArgs e)
-        {
-            if(ActiveTimer == true)
-            {
-                ActiveTimer = false;
-                timer.Tick.Elapsed -= experiment.Bacterias.Tick;
-                timer.Tick.Elapsed -= experiment.Viruses.Tick;
-                timer.Tick.Elapsed -= experiment.Fungi.Tick;
-                timer.Terminate();
-                CompositionTarget.Rendering -= UpdateTimeTrackers;
-                CompositionTarget.Rendering -= UpdateOrganismLabels;
-            }
+            CompositionTarget.Rendering -= UpdateTimeTrackers;
+            CompositionTarget.Rendering -= UpdateOrganismLabels;
+            CompositionTarget.Rendering -= TimerExecutioner;
+            CompositionTarget.Rendering -= DrawDish;
         }
     }
 
@@ -279,7 +317,7 @@ namespace OOP_Prog
                     if (Estimated.Equals(Zero))
                     {
                         this.State = TimerStates.Stopped;
-                        this.Terminate();
+                        this.Stop();
 
                     }
                     else
@@ -315,8 +353,9 @@ namespace OOP_Prog
             }
         }
 
-        public void Terminate()
+        public void Stop()
         {
+            State = TimerStates.Stopped;
             Tick.Stop();
         }
 
@@ -335,26 +374,25 @@ namespace OOP_Prog
         ExperimentStates State;
         public enum ExperimentStates
         {
+            Stopped,
             Running,
             OnTimer
         }
 
         public enum Species
         {
-            Bacteria = 1,
-            Virus = 2,
-            Fungus = 3
+            Bacteria = 3,
+            Virus = 5,
+            Fungus = 7
         }
 
-        public OrganismTracker Bacterias;
-        public OrganismTracker Viruses;
-        public OrganismTracker Fungi;
+        public List<OrganismTracker> organismTrackers = new List<OrganismTracker>();
 
         public Experiment(ExperimentStates experimentState)
         {
-            Bacterias = new OrganismTracker(Species.Bacteria);
-            Viruses = new OrganismTracker(Species.Virus);
-            Fungi = new OrganismTracker(Species.Fungus);
+            organismTrackers.Add(new OrganismTracker(Species.Bacteria, new int[3] { 0, 255, 0 }));
+            organismTrackers.Add(new OrganismTracker(Species.Virus, new int[3] { 255, 0, 0 }));
+            organismTrackers.Add(new OrganismTracker(Species.Fungus, new int[3] { 0, 0, 255 }));
         }
 
         public class OrganismTracker
@@ -362,10 +400,12 @@ namespace OOP_Prog
             public Species Species;
             public long Population;
             private int TickTracker = 0;
+            public int[] ColorData;
 
-            public OrganismTracker(Species species)
+            public OrganismTracker(Species species, int[] ColorData)
             {
                 this.Species = species;
+                this.ColorData = ColorData;
                 Population = 1;
             }
 

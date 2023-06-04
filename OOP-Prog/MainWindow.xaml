@@ -76,7 +76,7 @@
         </StackPanel>
 
         <GroupBox Header="PetriLive™ Cam" Grid.Row="1" Grid.Column="2">
-            <Image Source="/dishpic.jpg"></Image>
+            <Image Name="DishPic"></Image>
         </GroupBox>
     </Grid>
 </Window>
