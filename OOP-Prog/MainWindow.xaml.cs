@@ -31,11 +31,13 @@ namespace OOP_Prog
         Timer timer;
         Experiment experiment;
         WriteableBitmap bitCanvas;
+        DishDrawer drawer;
 
         public MainWindow()
         {
             InitializeComponent();
-            
+            bitCanvas = new WriteableBitmap(350, 350, 100, 100, PixelFormats.Bgra32, null);
+            drawer = new DishDrawer(bitCanvas);
         }
 
         #region Button events
@@ -46,7 +48,6 @@ namespace OOP_Prog
             {
                 timer = new Timer();
                 experiment = new Experiment(Experiment.ExperimentStates.Running);
-                bitCanvas = new WriteableBitmap((int)DishPic.ActualHeight, (int)DishPic.ActualWidth, 100, 100, PixelFormats.Rgb24, null);
                 DishPic.Source = bitCanvas;
                 EventsSubscribe();
             }
@@ -61,7 +62,6 @@ namespace OOP_Prog
                 {
                     timer = new Timer((int)GetTextboxInput(), (TimeMeasures)ComboboxTimeMode.SelectedIndex);
                     experiment = new Experiment(Experiment.ExperimentStates.Running);
-                    DishPic.Source = new WriteableBitmap((int)DishPic.ActualHeight, (int)DishPic.ActualWidth, 100, 100, PixelFormats.Rgb24, null);
                     EventsSubscribe();
                 }
 
@@ -94,31 +94,7 @@ namespace OOP_Prog
 
         public void DrawDish(object sender, EventArgs e)
         {
-            Random rnd = new Random();
-            bitCanvas = new WriteableBitmap((int)DishPic.ActualHeight, (int)DishPic.ActualWidth, 100, 100, PixelFormats.Rgb24, null);
-            bitCanvas.Lock();
-            int Column;
-            int Row;
-            foreach (Experiment.OrganismTracker ot in experiment.organismTrackers)
-            {
-                for(int i = 0; i < ot.Population; i++)
-                {
-                    unsafe
-                    {
-                        IntPtr pBackBuffer = bitCanvas.BackBuffer;
-                        Column = rnd.Next(0, bitCanvas.PixelHeight);
-                        Row = rnd.Next(0, bitCanvas.PixelWidth);
-                        pBackBuffer += Column;
-                        pBackBuffer += Row;
-                        int ColorToDraw = ot.ColorData[0] << 16;
-                        ColorToDraw |= ot.ColorData[1] << 8;
-                        ColorToDraw |= ot.ColorData[2] << 0;
-                        *((int*)pBackBuffer) = ColorToDraw;
-                    }
-                    bitCanvas.AddDirtyRect(new Int32Rect(Column, Row, 1, 1));
-                }
-            }
-            bitCanvas.Unlock();
+            drawer.Tick(experiment);
         }
 
         public void TimerExecutioner(object sender, EventArgs e)
@@ -170,6 +146,60 @@ namespace OOP_Prog
             CompositionTarget.Rendering -= UpdateOrganismLabels;
             CompositionTarget.Rendering -= TimerExecutioner;
             CompositionTarget.Rendering -= DrawDish;
+        }
+
+        class DishDrawer
+        {
+            WriteableBitmap wb;
+            Random rnd = new Random();
+            byte tracker = 0;
+            byte[] blank;
+
+            public DishDrawer(WriteableBitmap writeableBitmap)
+            {
+                wb = writeableBitmap;
+                blank = new byte[wb.PixelWidth * wb.PixelHeight * wb.Format.BitsPerPixel / 8];
+                for(int i = 0; i < blank.Length - 1; i++)
+                {
+                    blank[i] = 255;
+                }
+                blank[blank.Length - 1] = 255;
+            }
+
+            public void Tick(Experiment exp)
+            {
+                if(tracker == 60)
+                {
+                    Clear();
+                    DrawDish(exp);
+                    tracker = 0;
+                }
+                tracker++;
+            }
+
+            void DrawDish(Experiment exp)
+            {
+                int Column;
+                int Row;
+                foreach (Experiment.OrganismTracker ot in exp.organismTrackers)
+                {
+                    for (int i = 0; i < ot.Population; i++)
+                    {
+                        Column = rnd.Next(0, wb.PixelWidth);
+                        Row = rnd.Next(0, wb.PixelHeight);
+                        Int32Rect pix = new Int32Rect(Row, Column, 1, 1);
+                        wb.WritePixels(pix, ot.ColorData, GetStride(), 0);
+                    }
+                }
+            }
+
+            void Clear()
+            {
+                Int32Rect pix = new Int32Rect(0, 0, wb.PixelWidth, wb.PixelHeight);
+                wb.WritePixels(pix, blank, GetStride(), 0);
+            }
+
+            private int GetStride() => wb.PixelWidth * (wb.Format.BitsPerPixel / 8);
         }
     }
 
@@ -381,18 +411,18 @@ namespace OOP_Prog
 
         public enum Species
         {
-            Bacteria = 3,
-            Virus = 5,
-            Fungus = 7
+            Bacteria = 10,
+            Virus = 17,
+            Fungus = 22
         }
 
         public List<OrganismTracker> organismTrackers = new List<OrganismTracker>();
 
         public Experiment(ExperimentStates experimentState)
         {
-            organismTrackers.Add(new OrganismTracker(Species.Bacteria, new int[3] { 0, 255, 0 }));
-            organismTrackers.Add(new OrganismTracker(Species.Virus, new int[3] { 255, 0, 0 }));
-            organismTrackers.Add(new OrganismTracker(Species.Fungus, new int[3] { 0, 0, 255 }));
+            organismTrackers.Add(new OrganismTracker(Species.Bacteria, new byte[4] { 0, 255, 0 , 255}));
+            organismTrackers.Add(new OrganismTracker(Species.Virus, new byte[4] { 0, 0, 255 , 255}));
+            organismTrackers.Add(new OrganismTracker(Species.Fungus, new byte[4] { 255, 0, 0 , 255}));
         }
 
         public class OrganismTracker
@@ -400,9 +430,9 @@ namespace OOP_Prog
             public Species Species;
             public long Population;
             private int TickTracker = 0;
-            public int[] ColorData;
+            public byte[] ColorData;
 
-            public OrganismTracker(Species species, int[] ColorData)
+            public OrganismTracker(Species species, byte[] ColorData)
             {
                 this.Species = species;
                 this.ColorData = ColorData;
