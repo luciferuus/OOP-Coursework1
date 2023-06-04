@@ -209,31 +209,6 @@ namespace OOP_Prog
                 return a;
             }
 
-            /*
-            public static bool operator ==(Time a, Time b)
-            {
-                if((a.Days == b.Days) && (a.Hours == b.Hours) && (a.Minutes == b.Minutes) && (a.Seconds == b.Seconds))
-                {
-                    return true;
-                } else
-                {
-                    return false;
-                }
-            }
-
-            public static bool operator !=(Time a, Time b)
-            {
-                if ((a.Days == b.Days) && (a.Hours == b.Hours) && (a.Minutes == b.Minutes) && (a.Seconds == b.Seconds))
-                {
-                    return false;
-                }
-                else
-                {
-                    return true;
-                }
-            }
-            */
-
             public override string ToString()
             {
                 return $"{TStr(Days)}:{TStr(Hours)}:{TStr(Minutes)}:{TStr(Seconds)}";
