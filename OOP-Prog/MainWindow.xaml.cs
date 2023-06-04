@@ -133,282 +133,281 @@ namespace OOP_Prog
                 CompositionTarget.Rendering -= UpdateOrganismLabels;
             }
         }
+    }
 
-        #region Classes
-
-        public class Timer
+    public class Timer
+    {
+        public enum TimerStates
         {
-            public enum TimerStates
+            Stopped,
+            Limited,
+            Limitless
+        }
+
+        public struct Time //Stores days, hours, minutes and seconds
+        {
+            int Days;
+            int Hours;
+            int Minutes;
+            int Seconds;
+
+            public Time(int D, int H, int M, int S)
             {
-                Stopped,
-                Limited,
-                Limitless
+                Days = D;
+                Hours = H;
+                Minutes = M;
+                Seconds = S;
             }
 
-            public struct Time //Stores days, hours, minutes and seconds
+            public static Time operator --(Time a) //Decrease by 1 second
             {
-                int Days;
-                int Hours;
-                int Minutes;
-                int Seconds;
-
-                public Time(int D, int H, int M, int S)
+                while (true)
                 {
-                    Days = D;
-                    Hours = H;
-                    Minutes = M;
-                    Seconds = S;
-                }
-
-                public static Time operator --(Time a) //Decrease by 1 second
-                {
-                    while (true)
+                    if (a.Seconds == 0 && a.Minutes > 0)
                     {
-                        if (a.Seconds == 0 && a.Minutes > 0)
-                        {
-                            a.Seconds = 60; a.Minutes--;
-                        }
-                        else if (a.Minutes == 0 && a.Hours > 0)
-                        {
-                            a.Minutes = 59; a.Hours--;
-                        }
-                        else if (a.Hours == 0 && a.Days > 0)
-                        {
-                            a.Hours = 23; a.Days--;
-                        }
-                        else
-                        {
-                            break;
-                        }
+                        a.Seconds = 60; a.Minutes--;
                     }
-                    a.Seconds--;
-                    return a;
-                }
-
-                public static Time operator ++(Time a) //Increase by 1 second
-                {
-                    while (true)
+                    else if (a.Minutes == 0 && a.Hours > 0)
                     {
-                        if (a.Seconds == 60)
-                        {
-                            a.Seconds = 0; a.Minutes++;
-                        }
-                        else if (a.Minutes == 60)
-                        {
-                            a.Minutes = 0; a.Hours++;
-                        }
-                        else if (a.Hours == 24)
-                        {
-                            a.Hours = 0; a.Days++;
-                        }
-                        else
-                        {
-                            break;
-                        }
+                        a.Minutes = 59; a.Hours--;
                     }
-                    a.Seconds++;
-                    return a;
-                }
-
-                /*
-                public static bool operator ==(Time a, Time b)
-                {
-                    if((a.Days == b.Days) && (a.Hours == b.Hours) && (a.Minutes == b.Minutes) && (a.Seconds == b.Seconds))
+                    else if (a.Hours == 0 && a.Days > 0)
                     {
-                        return true;
-                    } else
-                    {
-                        return false;
-                    }
-                }
-
-                public static bool operator !=(Time a, Time b)
-                {
-                    if ((a.Days == b.Days) && (a.Hours == b.Hours) && (a.Minutes == b.Minutes) && (a.Seconds == b.Seconds))
-                    {
-                        return false;
+                        a.Hours = 23; a.Days--;
                     }
                     else
                     {
-                        return true;
+                        break;
                     }
                 }
-                */
+                a.Seconds--;
+                return a;
+            }
 
-                public override string ToString()
+            public static Time operator ++(Time a) //Increase by 1 second
+            {
+                while (true)
                 {
-                    return $"{TStr(Days)}:{TStr(Hours)}:{TStr(Minutes)}:{TStr(Seconds)}";
-                }
-
-                private string TStr(int val) //Used in ToString() to output components of time in conventional way
-                {
-                    if (val < 10)
+                    if (a.Seconds == 60)
                     {
-                        return "0" + val.ToString();
+                        a.Seconds = 0; a.Minutes++;
+                    }
+                    else if (a.Minutes == 60)
+                    {
+                        a.Minutes = 0; a.Hours++;
+                    }
+                    else if (a.Hours == 24)
+                    {
+                        a.Hours = 0; a.Days++;
                     }
                     else
                     {
-                        return val.ToString();
+                        break;
                     }
                 }
+                a.Seconds++;
+                return a;
             }
 
-            public TimerStates State { get; private set; }
-
-            private Time Elapsed { get; set; }
-
-            private Time Estimated { get; set; }
-
-            public System.Timers.Timer Tick;
-
-            private Time Zero = new Time(0, 0, 0, 0);
-
-            public Timer()
+            /*
+            public static bool operator ==(Time a, Time b)
             {
-                State = TimerStates.Limitless;
-                Initialize();
-            }
-
-            public Timer(int value, TimeMeasures measure)
-            {
-                State = TimerStates.Limited;
-                switch (measure)
+                if((a.Days == b.Days) && (a.Hours == b.Hours) && (a.Minutes == b.Minutes) && (a.Seconds == b.Seconds))
                 {
-                    case TimeMeasures.Seconds:
-                        Estimated = new Time(0, 0, 0, value);
-                        break;
-
-                    case TimeMeasures.Minutes:
-                        Estimated = new Time(0, 0, value, 0);
-                        break;
-
-                    case TimeMeasures.Hours:
-                        Estimated = new Time(0, value, 0, 0);
-                        break;
-
-                    case TimeMeasures.Days:
-                        Estimated = new Time(value,0,0,0);
-                        break;
-                }
-                Initialize();
-            }
-
-            private void InternalTick(object sender, EventArgs e)
-            {
-                switch (State)
+                    return true;
+                } else
                 {
-                    case TimerStates.Limitless:
-
-                        break;
-
-                    case TimerStates.Limited:
-                        if(Estimated.Equals(Zero))
-                        {
-                            this.State = TimerStates.Stopped;
-                            
-                        } else
-                        {
-                            Estimated--;
-                        }
-                        break;
-
-                    case TimerStates.Stopped:
-                        
-                        break;
-                }
-                if(this.State != TimerStates.Stopped)
-                {
-                    Elapsed++;
+                    return false;
                 }
             }
 
-            public string GetElapsed()
+            public static bool operator !=(Time a, Time b)
             {
-                return Elapsed.ToString();
-            }
-
-            public string GetEstimated()
-            {
-                if (State == TimerStates.Limitless)
+                if ((a.Days == b.Days) && (a.Hours == b.Hours) && (a.Minutes == b.Minutes) && (a.Seconds == b.Seconds))
                 {
-                    return "Infinity";
+                    return false;
                 }
                 else
                 {
-                    return Estimated.ToString();
+                    return true;
                 }
             }
+            */
 
-            public void Terminate()
+            public override string ToString()
             {
-                Tick.Stop();
+                return $"{TStr(Days)}:{TStr(Hours)}:{TStr(Minutes)}:{TStr(Seconds)}";
             }
 
-            private void Initialize() //Performes setup common for all types of timers
+            private string TStr(int val) //Used in ToString() to output components of time in conventional way
             {
-                Elapsed = new Time(0, 0, 0, 0);
-                Tick = new System.Timers.Timer(1000);
-                Tick.Elapsed += InternalTick;
-                Tick.AutoReset = true;
-                Tick.Start();
+                if (val < 10)
+                {
+                    return "0" + val.ToString();
+                }
+                else
+                {
+                    return val.ToString();
+                }
             }
         }
 
-        public class Experiment
+        public TimerStates State { get; private set; }
+
+        private Time Elapsed { get; set; }
+
+        private Time Estimated { get; set; }
+
+        public System.Timers.Timer Tick;
+
+        private Time Zero = new Time(0, 0, 0, 0);
+
+        public Timer()
         {
-            ExperimentStates State;
-            public enum ExperimentStates
+            State = TimerStates.Limitless;
+            Initialize();
+        }
+
+        public Timer(int value, TimeMeasures measure)
+        {
+            State = TimerStates.Limited;
+            switch (measure)
             {
-                Running,
-                OnTimer
+                case TimeMeasures.Seconds:
+                    Estimated = new Time(0, 0, 0, value);
+                    break;
+
+                case TimeMeasures.Minutes:
+                    Estimated = new Time(0, 0, value, 0);
+                    break;
+
+                case TimeMeasures.Hours:
+                    Estimated = new Time(0, value, 0, 0);
+                    break;
+
+                case TimeMeasures.Days:
+                    Estimated = new Time(value, 0, 0, 0);
+                    break;
             }
+            Initialize();
+        }
 
-            public enum Species
+        private void InternalTick(object sender, EventArgs e)
+        {
+            switch (State)
             {
-                Bacteria = 1,
-                Virus = 2,
-                Fungus = 3
-            }
+                case TimerStates.Limitless:
 
-            public OrganismTracker Bacterias;
-            public OrganismTracker Viruses;
-            public OrganismTracker Fungi;
+                    break;
 
-            public Experiment(ExperimentStates experimentState)
-            {
-                Bacterias = new OrganismTracker(Species.Bacteria);
-                Viruses = new OrganismTracker(Species.Virus);
-                Fungi = new OrganismTracker(Species.Fungus);
-            }
+                case TimerStates.Limited:
+                    if (Estimated.Equals(Zero))
+                    {
+                        this.State = TimerStates.Stopped;
+                        this.Terminate();
 
-            public class OrganismTracker
-            {
-                public Species Species;
-                public long Population;
-                private int TickTracker = 0;
-
-                public OrganismTracker(Species species)
-                {
-                    this.Species = species;
-                    Population = 1;
-                }
-
-                void Multiply()
-                {
-                    Population *= 2;
-                }
-
-                public void Tick(object sender, EventArgs e)
-                {
-                    TickTracker++;
-                    if(TickTracker == (int)Species) {
-                        TickTracker = 0;
-                        Multiply();
                     }
-                }
+                    else
+                    {
+                        Estimated--;
+                    }
+                    break;
+
+                case TimerStates.Stopped:
+
+                    break;
+            }
+            if (this.State != TimerStates.Stopped)
+            {
+                Elapsed++;
             }
         }
 
-        #endregion
+        public string GetElapsed()
+        {
+            return Elapsed.ToString();
+        }
+
+        public string GetEstimated()
+        {
+            if (State == TimerStates.Limitless)
+            {
+                return "Infinity";
+            }
+            else
+            {
+                return Estimated.ToString();
+            }
+        }
+
+        public void Terminate()
+        {
+            Tick.Stop();
+        }
+
+        private void Initialize() //Performes setup common for all types of timers
+        {
+            Elapsed = new Time(0, 0, 0, 0);
+            Tick = new System.Timers.Timer(1000);
+            Tick.Elapsed += InternalTick;
+            Tick.AutoReset = true;
+            Tick.Start();
+        }
+    }
+
+    public class Experiment
+    {
+        ExperimentStates State;
+        public enum ExperimentStates
+        {
+            Running,
+            OnTimer
+        }
+
+        public enum Species
+        {
+            Bacteria = 1,
+            Virus = 2,
+            Fungus = 3
+        }
+
+        public OrganismTracker Bacterias;
+        public OrganismTracker Viruses;
+        public OrganismTracker Fungi;
+
+        public Experiment(ExperimentStates experimentState)
+        {
+            Bacterias = new OrganismTracker(Species.Bacteria);
+            Viruses = new OrganismTracker(Species.Virus);
+            Fungi = new OrganismTracker(Species.Fungus);
+        }
+
+        public class OrganismTracker
+        {
+            public Species Species;
+            public long Population;
+            private int TickTracker = 0;
+
+            public OrganismTracker(Species species)
+            {
+                this.Species = species;
+                Population = 1;
+            }
+
+            void Multiply()
+            {
+                Population *= 2;
+            }
+
+            public void Tick(object sender, EventArgs e)
+            {
+                TickTracker++;
+                if (TickTracker == (int)Species)
+                {
+                    TickTracker = 0;
+                    Multiply();
+                }
+            }
+        }
     }
 }
