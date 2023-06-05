@@ -5,6 +5,7 @@ using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using System.Xml.Serialization;
 
 namespace OOP_Prog
 {
@@ -64,11 +65,13 @@ namespace OOP_Prog
                 if (GetTextboxInput() != null)
                 {
                     byte[] blank = new byte[bitCanvas.PixelWidth * bitCanvas.PixelHeight * bitCanvas.Format.BitsPerPixel / 8];
-                    for (int i = 0; i < blank.Length - 1; i++)
+                    for (int i = 0; i < blank.Length - 4; i += 4)
                     {
-                        blank[i] = 255;
+                        blank[i] = 0;
+                        blank[i + 1] = 0;
+                        blank[i + 2] = 0;
+                        blank[i + 3] = 255;
                     }
-                    blank[blank.Length - 1] = 255;
 
                     Dispatcher.Invoke(() =>
                     {
@@ -76,8 +79,8 @@ namespace OOP_Prog
                         bitCanvas.WritePixels(pix, blank, bitCanvas.PixelWidth * (bitCanvas.Format.BitsPerPixel / 8), 0);
                     });
 
-                    DishPic.Source = bitCanvas;
                     timer = new Timer((int)GetTextboxInput(), (TimeMeasures)ComboboxTimeMode.SelectedIndex);
+                    DishPic.Source = bitCanvas;
                     experiment = new Experiment(Experiment.ExperimentStates.OnTimer, Dispatcher, bitCanvas);
                     EventsSubscribe();
                 }
@@ -192,11 +195,11 @@ namespace OOP_Prog
                         }
                         else if (a.Minutes == 0 && a.Hours > 0)
                         {
-                            a.Minutes = 59; a.Hours--;
+                            a.Minutes = 60; a.Hours--;
                         }
                         else if (a.Hours == 0 && a.Days > 0)
                         {
-                            a.Hours = 23; a.Days--;
+                            a.Hours = 24; a.Days--;
                         }
                         else
                         {
@@ -357,6 +360,7 @@ namespace OOP_Prog
         public class Experiment
         {
             ExperimentStates State; //Current state of the experiment
+            Random random;
 
             public enum ExperimentStates //Possible states of the experiment
             {
@@ -367,49 +371,52 @@ namespace OOP_Prog
 
             public enum Species //Organism species and their multiplying period
             {
-                Bacteria = 5,
-                Virus = 8,
-                Fungus = 11
+                Bacteria = 1,
+                Virus = 5,
+                Fungus = 7
             }
 
             public List<OrganismTracker> organismTrackers = new List<OrganismTracker>(); //List of organism trackers
 
             public Experiment(ExperimentStates experimentState, Dispatcher dispatcher, WriteableBitmap writeableBitmap) //Creates an experiment with specific state and 3 trackers for 3 species
             {
-                organismTrackers.Add(new OrganismTracker(Species.Bacteria, new byte[4] { 0, 255, 0, 255 }, dispatcher, writeableBitmap));
-                organismTrackers.Add(new OrganismTracker(Species.Virus, new byte[4] { 0, 0, 255, 255 }, dispatcher, writeableBitmap));
-                organismTrackers.Add(new OrganismTracker(Species.Fungus, new byte[4] { 255, 0, 0, 255 }, dispatcher, writeableBitmap));
+                random = new Random();
+                organismTrackers.Add(new OrganismTracker(Species.Bacteria, new byte[4] { 0, 255, 0, 255 }, dispatcher, writeableBitmap, random));
+                organismTrackers.Add(new OrganismTracker(Species.Virus, new byte[4] { 0, 0, 255, 255 }, dispatcher, writeableBitmap, random));
+                organismTrackers.Add(new OrganismTracker(Species.Fungus, new byte[4] { 255, 0, 0, 255 }, dispatcher, writeableBitmap, random));
             }
 
             public class OrganismTracker //Tracks one species of organisms
             {
                 WriteableBitmap wb;
-                Random random = new Random();
+                Random random;
                 DrawUtils drawUtils;
                 Dispatcher dispatcher;
                 public Species Species; //Species that are tracked
                 public long Population; //Self-explanatory
-                public long PreviousStep;
                 private int TickTracker = 0; //Tracks when to multiply
                 public byte[] ColorData; //Color used during drawing the organism
-                public long power = 16; //Amount of organisms represented by 1 pixel
+                public long power = 1; //Amount of organisms represented by 1 pixel
                 private long drawn = 0; //Amount of already drawn organisms
+                private Func<long, long> progression = x => (long)Math.Round(Math.Sqrt(x * 4 * Math.Pow(1.1, 16)));
+                private long ticks = 0;
 
-                public OrganismTracker(Species species, byte[] ColorData, Dispatcher dispatcher, WriteableBitmap writeableBitmap) //Creates a tracker of a species and gives them a color
+                public OrganismTracker(Species species, byte[] ColorData, Dispatcher dispatcher, WriteableBitmap writeableBitmap, Random random) //Creates a tracker of a species and gives them a color
                 {
                     this.Species = species;
                     this.ColorData = ColorData;
                     this.dispatcher = dispatcher;
                     this.wb = writeableBitmap;
                     this.drawUtils = new DrawUtils(wb);
-                    PreviousStep = 1;
+                    this.random = random;
                     Population = 1;
                     DrawOrganisms((int)Population/(int)power);
                 }
 
                 async void Multiply() //Doubles population
                 {
-                    Population *= 2;
+                    ticks++;
+                    Population = progression(ticks);
                     int toDraw = (int)((Population - drawn) / power);
                     await dispatcher.InvokeAsync(() => DrawOrganisms(toDraw));
                 }
@@ -419,11 +426,10 @@ namespace OOP_Prog
                     drawn += amount * power;
                     int Column;
                     int Row;
-                    random = new Random();
                     for (int i = 0; i < amount; i++)
                     {
-                        Column = random.Next(0, wb.PixelWidth);
-                        Row = random.Next(0, wb.PixelHeight);
+                        Column = GetCoordinate(wb.PixelWidth / 2, wb.PixelWidth / 10);
+                        Row = GetCoordinate(wb.PixelHeight / 2, wb.PixelHeight / 10);
                         Int32Rect pix = new Int32Rect(Row, Column, 1, 1);
                         wb.WritePixels(pix, ColorData, DrawUtils.GetStride(wb), 0);
                     }
@@ -436,6 +442,15 @@ namespace OOP_Prog
                         Int32Rect pix = new Int32Rect(0, 0, wb.PixelWidth, wb.PixelHeight);
                         wb.WritePixels(pix, drawUtils.blank, DrawUtils.GetStride(wb), 0);
                     });
+                }
+
+                private int GetCoordinate(int origin, double spread)
+                {
+                    double x1 = 1 - random.NextDouble();
+                    double x2 = 1 - random.NextDouble();
+
+                    double y1 = Math.Sqrt(-2.0 * Math.Log(x1)) * Math.Cos(2.0 * Math.PI * x2);
+                    return (int)((y1 * spread) % 1000) + origin;
                 }
 
                 public void Tick(object sender, EventArgs e) //Tick, must be subscribed to tick in timer
