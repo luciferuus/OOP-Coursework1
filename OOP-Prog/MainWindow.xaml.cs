@@ -30,10 +30,10 @@ namespace OOP_Prog
     {
         Timer timer;
         Experiment experiment;
-        WriteableBitmap bitCanvas;
-        DishDrawer drawer;
+        readonly WriteableBitmap bitCanvas;
+        readonly DishDrawer drawer;
 
-        public MainWindow()
+        public MainWindow() //Window initialization
         {
             InitializeComponent();
             bitCanvas = new WriteableBitmap(350, 350, 100, 100, PixelFormats.Bgra32, null);
@@ -42,18 +42,19 @@ namespace OOP_Prog
 
         #region Button events
 
-        private void Start_Click(object sender, EventArgs e)
+        private void Start_Click(object sender, EventArgs e) //Handles clicking the "Start" button
         {
             if (timer == null || timer.State == Timer.TimerStates.Stopped)
             {
                 timer = new Timer();
                 experiment = new Experiment(Experiment.ExperimentStates.Running);
+                drawer.Assign(experiment);
                 DishPic.Source = bitCanvas;
                 EventsSubscribe();
             }
         }
 
-        private void StartTimed_Click(object sender, EventArgs e)
+        private void StartTimed_Click(object sender, EventArgs e) //Handles clicking the "Start" button in TimeExp zone
         {
             TextboxExperimentTime.BorderBrush = Brushes.Gray;
             if (timer == null || timer.State == Timer.TimerStates.Stopped)
@@ -62,13 +63,14 @@ namespace OOP_Prog
                 {
                     timer = new Timer((int)GetTextboxInput(), (TimeMeasures)ComboboxTimeMode.SelectedIndex);
                     experiment = new Experiment(Experiment.ExperimentStates.Running);
+                    drawer.Assign(experiment);
                     EventsSubscribe();
                 }
 
             }
         }
 
-        private void Stop_Click(object sender, EventArgs e)
+        private void Stop_Click(object sender, EventArgs e) //Handles clicking the "Stop" button
         {
             if (timer != null && timer.State != Timer.TimerStates.Stopped)
             {
@@ -79,25 +81,25 @@ namespace OOP_Prog
 
         #endregion
 
-        public void UpdateTimeTrackers(object sender, EventArgs e)
+        public void UpdateTimeTrackers(object sender, EventArgs e) //Updates labels keeping track of time
         {
             ElapsedLabel.Text = timer.GetElapsed();
             EstimatedLabel.Text = timer.GetEstimated();
         }
 
-        public void UpdateOrganismLabels(object sender, EventArgs e)
+        public void UpdateOrganismLabels(object sender, EventArgs e) //Updates values in labels tracking population of organisms
         {
             LabelBacteriaCount.Text = experiment.organismTrackers[0].Population.ToString();
             LabelVirusCount.Text = experiment.organismTrackers[1].Population.ToString();
             LabelFungiCount.Text = experiment.organismTrackers[2].Population.ToString();
         }
 
-        public void DrawDish(object sender, EventArgs e)
+        public void DrawDish(object sender, EventArgs e) //Hook between UI and DishDrawer class
         {
-            drawer.Tick(experiment);
+            drawer.Tick();
         }
 
-        public void TimerExecutioner(object sender, EventArgs e)
+        public void TimerExecutioner(object sender, EventArgs e) //Checks if timer ran out, the stops it
         {
             if(timer.State == Timer.TimerStates.Stopped)
             {
@@ -105,7 +107,7 @@ namespace OOP_Prog
             }
         }
 
-        public int? GetTextboxInput()
+        public int? GetTextboxInput() //Gets the value from the textbox in TimeExp zone and checks it if it is valid
         {
             int input;
             try
@@ -124,7 +126,7 @@ namespace OOP_Prog
             return input;
         }
 
-        private void EventsSubscribe()
+        private void EventsSubscribe() //Subscribes OrganismTrackers to Timer tick and UI stuff to Rendering tick
         {
             foreach (Experiment.OrganismTracker ot in experiment.organismTrackers)
             {
@@ -136,7 +138,7 @@ namespace OOP_Prog
             CompositionTarget.Rendering += DrawDish;
         }
 
-        private void EventsUnsubscribe()
+        private void EventsUnsubscribe() //Unsubscribes OrganismTrackers from Timer tick and UI stuff from Rendering tick
         {
             foreach(Experiment.OrganismTracker ot in experiment.organismTrackers)
             {
@@ -150,38 +152,44 @@ namespace OOP_Prog
 
         class DishDrawer
         {
-            WriteableBitmap wb;
-            Random rnd = new Random();
-            byte tracker = 0;
-            byte[] blank;
+            readonly WriteableBitmap wb; //THE bitmap
+            Experiment experiment; //An experiment, must be assigned through a dedicated function
+            readonly Random rnd = new Random(); //Used for creating an organism pixel in a random location
+            byte tracker = 0; //Tracks a moment for bitmap update
+            readonly byte[] blank; //Array of white pixels. Used for clearing the bitmap
 
-            public DishDrawer(WriteableBitmap writeableBitmap)
+            public DishDrawer(WriteableBitmap writeableBitmap) //Creates a DishDrawer with a WritableBitmap
             {
                 wb = writeableBitmap;
                 blank = new byte[wb.PixelWidth * wb.PixelHeight * wb.Format.BitsPerPixel / 8];
-                for(int i = 0; i < blank.Length - 1; i++)
+                for (int i = 0; i < blank.Length - 1; i++)
                 {
                     blank[i] = 255;
                 }
                 blank[blank.Length - 1] = 255;
             }
 
-            public void Tick(Experiment exp)
+            public void Assign(Experiment experiment) //Binds DishDrawer to an experiment
+            {
+                this.experiment = experiment;
+            }
+
+            public void Tick() //Tick of a DishDrawer. Cleares the bitmap, then fills it with pixels
             {
                 if(tracker == 60)
                 {
                     Clear();
-                    DrawDish(exp);
+                    DrawDish();
                     tracker = 0;
                 }
                 tracker++;
             }
 
-            void DrawDish(Experiment exp)
+            void DrawDish() //Draws a pixel with corresponding color for every organism of every species in a random location
             {
                 int Column;
                 int Row;
-                foreach (Experiment.OrganismTracker ot in exp.organismTrackers)
+                foreach (Experiment.OrganismTracker ot in experiment.organismTrackers)
                 {
                     for (int i = 0; i < ot.Population; i++)
                     {
@@ -193,19 +201,19 @@ namespace OOP_Prog
                 }
             }
 
-            void Clear()
+            void Clear() //Fills the bitmap with white pixels
             {
                 Int32Rect pix = new Int32Rect(0, 0, wb.PixelWidth, wb.PixelHeight);
                 wb.WritePixels(pix, blank, GetStride(), 0);
             }
 
-            private int GetStride() => wb.PixelWidth * (wb.Format.BitsPerPixel / 8);
+            private int GetStride() => wb.PixelWidth * (wb.Format.BitsPerPixel / 8); //Calculates stride, used for writing pixels into the bitmap
         }
     }
 
     public class Timer
     {
-        public enum TimerStates
+        public enum TimerStates //Possible states of the timer
         {
             Stopped,
             Limited,
@@ -295,23 +303,23 @@ namespace OOP_Prog
             }
         }
 
-        public TimerStates State { get; private set; }
+        public TimerStates State { get; private set; } //Current state of the timer
 
-        private Time Elapsed { get; set; }
+        private Time Elapsed { get; set; } //Tracks time elapsed from the start
 
-        private Time Estimated { get; set; }
+        private Time Estimated { get; set; } //Track estimated time
 
-        public System.Timers.Timer Tick;
+        public System.Timers.Timer Tick; //THE timer
 
-        private Time Zero = new Time(0, 0, 0, 0);
+        private Time Zero = new Time(0, 0, 0, 0); //Used for comparason in timers with time limit
 
-        public Timer()
+        public Timer() //Creates a timer with no time limit
         {
             State = TimerStates.Limitless;
             Initialize();
         }
 
-        public Timer(int value, TimeMeasures measure)
+        public Timer(int value, TimeMeasures measure) //Creates timer with a time limit
         {
             State = TimerStates.Limited;
             switch (measure)
@@ -335,7 +343,7 @@ namespace OOP_Prog
             Initialize();
         }
 
-        private void InternalTick(object sender, EventArgs e)
+        private void InternalTick(object sender, EventArgs e) //Things that happen inside the timer on tick
         {
             switch (State)
             {
@@ -366,12 +374,12 @@ namespace OOP_Prog
             }
         }
 
-        public string GetElapsed()
+        public string GetElapsed() //Returns elapsed time
         {
             return Elapsed.ToString();
         }
 
-        public string GetEstimated()
+        public string GetEstimated() //Returns estimated time
         {
             if (State == TimerStates.Limitless)
             {
@@ -383,7 +391,7 @@ namespace OOP_Prog
             }
         }
 
-        public void Stop()
+        public void Stop() //Stops the timer
         {
             State = TimerStates.Stopped;
             Tick.Stop();
@@ -401,50 +409,50 @@ namespace OOP_Prog
 
     public class Experiment
     {
-        ExperimentStates State;
-        public enum ExperimentStates
+        ExperimentStates State; //Current state of the experiment
+        public enum ExperimentStates //Possible states of the experiment
         {
             Stopped,
             Running,
             OnTimer
         }
 
-        public enum Species
+        public enum Species //Organism species and their multiplying period
         {
             Bacteria = 10,
             Virus = 17,
             Fungus = 22
         }
 
-        public List<OrganismTracker> organismTrackers = new List<OrganismTracker>();
+        public List<OrganismTracker> organismTrackers = new List<OrganismTracker>(); //List of organism trackers
 
-        public Experiment(ExperimentStates experimentState)
+        public Experiment(ExperimentStates experimentState) //Creates an experiment with specific state and 3 trackers for 3 species
         {
             organismTrackers.Add(new OrganismTracker(Species.Bacteria, new byte[4] { 0, 255, 0 , 255}));
             organismTrackers.Add(new OrganismTracker(Species.Virus, new byte[4] { 0, 0, 255 , 255}));
             organismTrackers.Add(new OrganismTracker(Species.Fungus, new byte[4] { 255, 0, 0 , 255}));
         }
 
-        public class OrganismTracker
+        public class OrganismTracker //Tracks one species of organisms
         {
-            public Species Species;
-            public long Population;
-            private int TickTracker = 0;
-            public byte[] ColorData;
+            public Species Species; //Species that are tracked
+            public long Population; //Self-explanatory
+            private int TickTracker = 0; //Tracks when to multiply
+            public byte[] ColorData; //Color used during drawing the organism
 
-            public OrganismTracker(Species species, byte[] ColorData)
+            public OrganismTracker(Species species, byte[] ColorData) //Creates a tracker of a species and gives them a color
             {
                 this.Species = species;
                 this.ColorData = ColorData;
                 Population = 1;
             }
 
-            void Multiply()
+            void Multiply() //Doubles population
             {
                 Population *= 2;
             }
 
-            public void Tick(object sender, EventArgs e)
+            public void Tick(object sender, EventArgs e) //Tick, must be subscribed to tick in timer
             {
                 TickTracker++;
                 if (TickTracker == (int)Species)
