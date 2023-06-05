@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -33,9 +34,24 @@ namespace OOP_Prog
         {
             if (timer == null || timer.State == Timer.TimerStates.Stopped)
             {
+                byte[] blank = new byte[bitCanvas.PixelWidth * bitCanvas.PixelHeight * bitCanvas.Format.BitsPerPixel / 8];
+                for (int i = 0; i < blank.Length - 4; i += 4)
+                {
+                    blank[i] = 0;
+                    blank[i + 1] = 0;
+                    blank[i + 2] = 0;
+                    blank[i + 3] = 255;
+                }
+
+                Dispatcher.Invoke(() =>
+                {
+                    Int32Rect pix = new Int32Rect(0, 0, bitCanvas.PixelWidth, bitCanvas.PixelHeight);
+                    bitCanvas.WritePixels(pix, blank, bitCanvas.PixelWidth * (bitCanvas.Format.BitsPerPixel / 8), 0);
+                });
+
                 timer = new Timer();
-                experiment = new Experiment(Experiment.ExperimentStates.Running, Dispatcher, bitCanvas);
                 DishPic.Source = bitCanvas;
+                experiment = new Experiment(Experiment.ExperimentStates.Running, Dispatcher, bitCanvas);
                 EventsSubscribe();
             }
         }
@@ -47,6 +63,20 @@ namespace OOP_Prog
             {
                 if (GetTextboxInput() != null)
                 {
+                    byte[] blank = new byte[bitCanvas.PixelWidth * bitCanvas.PixelHeight * bitCanvas.Format.BitsPerPixel / 8];
+                    for (int i = 0; i < blank.Length - 1; i++)
+                    {
+                        blank[i] = 255;
+                    }
+                    blank[blank.Length - 1] = 255;
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        Int32Rect pix = new Int32Rect(0, 0, bitCanvas.PixelWidth, bitCanvas.PixelHeight);
+                        bitCanvas.WritePixels(pix, blank, bitCanvas.PixelWidth * (bitCanvas.Format.BitsPerPixel / 8), 0);
+                    });
+
+                    DishPic.Source = bitCanvas;
                     timer = new Timer((int)GetTextboxInput(), (TimeMeasures)ComboboxTimeMode.SelectedIndex);
                     experiment = new Experiment(Experiment.ExperimentStates.OnTimer, Dispatcher, bitCanvas);
                     EventsSubscribe();
@@ -362,7 +392,8 @@ namespace OOP_Prog
                 public long PreviousStep;
                 private int TickTracker = 0; //Tracks when to multiply
                 public byte[] ColorData; //Color used during drawing the organism
-                public long power; //Amount of organisms represented by 1 pixel
+                public long power = 16; //Amount of organisms represented by 1 pixel
+                private long drawn = 0; //Amount of already drawn organisms
 
                 public OrganismTracker(Species species, byte[] ColorData, Dispatcher dispatcher, WriteableBitmap writeableBitmap) //Creates a tracker of a species and gives them a color
                 {
@@ -373,22 +404,19 @@ namespace OOP_Prog
                     this.drawUtils = new DrawUtils(wb);
                     PreviousStep = 1;
                     Population = 1;
-                    DrawOrganisms(1);
+                    DrawOrganisms((int)Population/(int)power);
                 }
 
                 async void Multiply() //Doubles population
                 {
-                    PreviousStep = Population;
                     Population *= 2;
-                    if (power == 1 && Population == 128) { power = 128; }
-                    else if (Population / power == 128) { power *= 128; }
-                    Clear();
-                    int toDraw = (int)(Population / power);
+                    int toDraw = (int)((Population - drawn) / power);
                     await dispatcher.InvokeAsync(() => DrawOrganisms(toDraw));
                 }
 
                 private void DrawOrganisms(int amount) //Draws specific amount of pixels on a bitmap
                 {
+                    drawn += amount * power;
                     int Column;
                     int Row;
                     random = new Random();
@@ -401,7 +429,7 @@ namespace OOP_Prog
                     }
                 }
 
-                private void Clear() //Clears the bitmap
+                public void ClearBitmap() //Clears the bitmap
                 {
                     dispatcher.Invoke(() =>
                     {
@@ -442,11 +470,13 @@ namespace OOP_Prog
                     public DrawUtils(WriteableBitmap wb)
                     {
                         blank = new byte[wb.PixelWidth * wb.PixelHeight * wb.Format.BitsPerPixel / 8];
-                        for (int i = 0; i < blank.Length - 1; i++)
+                        for (int i = 0; i < blank.Length - 4; i += 4)
                         {
-                            blank[i] = 255;
+                            blank[i] = 0;
+                            blank[i + 1] = 0;
+                            blank[i + 2] = 0;
+                            blank[i + 3] = 255;
                         }
-                        blank[blank.Length - 1] = 255;
                     }
 
                     public static int GetStride(WriteableBitmap wb) => wb.PixelWidth * (wb.Format.BitsPerPixel / 8); //Calculates stride, used for writing pixels into the bitmap
