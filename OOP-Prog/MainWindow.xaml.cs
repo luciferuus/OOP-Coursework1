@@ -1,20 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Markup.Localizer;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 
 namespace OOP_Prog
@@ -367,12 +355,14 @@ namespace OOP_Prog
             {
                 WriteableBitmap wb;
                 Random random = new Random();
+                DrawUtils drawUtils;
                 Dispatcher dispatcher;
                 public Species Species; //Species that are tracked
                 public long Population; //Self-explanatory
                 public long PreviousStep;
                 private int TickTracker = 0; //Tracks when to multiply
                 public byte[] ColorData; //Color used during drawing the organism
+                public long power; //Amount of organisms represented by 1 pixel
 
                 public OrganismTracker(Species species, byte[] ColorData, Dispatcher dispatcher, WriteableBitmap writeableBitmap) //Creates a tracker of a species and gives them a color
                 {
@@ -380,29 +370,44 @@ namespace OOP_Prog
                     this.ColorData = ColorData;
                     this.dispatcher = dispatcher;
                     this.wb = writeableBitmap;
+                    this.drawUtils = new DrawUtils(wb);
                     PreviousStep = 1;
                     Population = 1;
+                    DrawOrganisms(1);
                 }
 
                 async void Multiply() //Doubles population
                 {
                     PreviousStep = Population;
                     Population *= 2;
-                    await dispatcher.InvokeAsync(() => DrawOrganisms());
+                    if (power == 1 && Population == 128) { power = 128; }
+                    else if (Population / power == 128) { power *= 128; }
+                    Clear();
+                    int toDraw = (int)(Population / power);
+                    await dispatcher.InvokeAsync(() => DrawOrganisms(toDraw));
                 }
 
-                private void DrawOrganisms()
+                private void DrawOrganisms(int amount) //Draws specific amount of pixels on a bitmap
                 {
                     int Column;
                     int Row;
                     random = new Random();
-                    for (int i = (int)PreviousStep; i < (int)Population; i++)
+                    for (int i = 0; i < amount; i++)
                     {
                         Column = random.Next(0, wb.PixelWidth);
                         Row = random.Next(0, wb.PixelHeight);
                         Int32Rect pix = new Int32Rect(Row, Column, 1, 1);
                         wb.WritePixels(pix, ColorData, DrawUtils.GetStride(wb), 0);
                     }
+                }
+
+                private void Clear() //Clears the bitmap
+                {
+                    dispatcher.Invoke(() =>
+                    {
+                        Int32Rect pix = new Int32Rect(0, 0, wb.PixelWidth, wb.PixelHeight);
+                        wb.WritePixels(pix, drawUtils.blank, DrawUtils.GetStride(wb), 0);
+                    });
                 }
 
                 public void Tick(object sender, EventArgs e) //Tick, must be subscribed to tick in timer
@@ -415,7 +420,7 @@ namespace OOP_Prog
                     }
                 }
 
-                public string PopulationString
+                public string PopulationString //Returns population as a string
                 {
                     get
                     {
@@ -430,7 +435,7 @@ namespace OOP_Prog
                     }
                 }
 
-                private class DrawUtils
+                private class DrawUtils //Utilities for drawing on a WritableBitmap
                 {
                     readonly public byte[] blank; //Array of white pixels. Used for clearing the bitmap
 
