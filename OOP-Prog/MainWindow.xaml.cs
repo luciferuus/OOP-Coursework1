@@ -412,7 +412,7 @@ namespace OOP_Prog
             public byte[] ColorData; //Color used during drawing the organism
             public long power = 1; //Amount of organisms represented by 1 pixel
             private long drawn = 0; //Amount of already drawn organisms
-            private Func<long, long> progression = x => (long)Math.Round(Math.Sqrt(2 * x * 4 * Math.Pow(1.11, 16))); //Determines speed of organism multiplication
+            private Func<long, long> progression = x => (long)Math.Round(Math.Sqrt(2 * x * 4 * Math.Pow(1.21, 16))); //Determines speed of organism multiplication
             private long ticks = 0; //Tick tracker for correct progression
 
             public OrganismTracker(Species species, byte[] ColorData, Dispatcher dispatcher, WriteableBitmap writeableBitmap, Random random) //Creates a tracker of a species and gives them a color
