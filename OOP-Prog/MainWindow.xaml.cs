@@ -303,15 +303,11 @@ namespace OOP_Prog
                     break;
 
                 case TimerStates.Limited:
-                    if (Estimated.Equals(Zero))
+                    Estimated--;
+                    if (Estimated.ToString() == "00:00:00:00")
                     {
                         this.State = TimerStates.Stopped;
                         this.Stop();
-
-                    }
-                    else
-                    {
-                        Estimated--;
                     }
                     break;
 

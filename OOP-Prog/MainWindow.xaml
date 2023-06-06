@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:OOP_Prog"
         mc:Ignorable="d"
-        Title="Unsanitary frenzy" ResizeMode="NoResize" Height="500" Width="600">
+        Title="Unsanitary frenzy" ResizeMode="NoResize" Height="500" Width="600" Icon="/dishpic.jpg">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10"></ColumnDefinition>
