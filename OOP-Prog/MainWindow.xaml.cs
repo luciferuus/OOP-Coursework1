@@ -19,8 +19,8 @@ namespace OOP_Prog
 
     public partial class MainWindow : Window
     {
-        public Timer timer;
-        public Experiment experiment;
+        private Timer timer;
+        private Experiment experiment;
         readonly WriteableBitmap bitCanvas;
 
         public MainWindow() //Window initialization
@@ -29,13 +29,19 @@ namespace OOP_Prog
             bitCanvas = new WriteableBitmap(350, 350, 100, 100, PixelFormats.Bgra32, null);
         }
 
+        public Experiment Experiment { get; set; }
+
+        public Timer Timer { get; set; }
+
+        public WriteableBitmap BitCanvas => bitCanvas;
+
         #region Button events
 
         private void Start_Click(object sender, EventArgs e) //Handles clicking the "Start" button
         {
-            if (timer == null || timer.State == Timer.TimerStates.Stopped)
+            if (Timer == null || Timer.State == Timer.TimerStates.Stopped)
             {
-                byte[] blank = new byte[bitCanvas.PixelWidth * bitCanvas.PixelHeight * bitCanvas.Format.BitsPerPixel / 8];
+                byte[] blank = new byte[BitCanvas.PixelWidth * BitCanvas.PixelHeight * BitCanvas.Format.BitsPerPixel / 8];
                 for (int i = 0; i < blank.Length - 4; i += 4)
                 {
                     blank[i] = 0;
@@ -46,13 +52,13 @@ namespace OOP_Prog
 
                 Dispatcher.Invoke(() =>
                 {
-                    Int32Rect pix = new Int32Rect(0, 0, bitCanvas.PixelWidth, bitCanvas.PixelHeight);
-                    bitCanvas.WritePixels(pix, blank, bitCanvas.PixelWidth * (bitCanvas.Format.BitsPerPixel / 8), 0);
+                    Int32Rect pix = new Int32Rect(0, 0, BitCanvas.PixelWidth, BitCanvas.PixelHeight);
+                    BitCanvas.WritePixels(pix, blank, BitCanvas.PixelWidth * (BitCanvas.Format.BitsPerPixel / 8), 0);
                 });
 
-                timer = new Timer();
-                DishPic.Source = bitCanvas;
-                experiment = new Experiment(Experiment.ExperimentStates.Running, Dispatcher, bitCanvas);
+                Timer = new Timer();
+                DishPic.Source = BitCanvas;
+                Experiment = new Experiment(Experiment.ExperimentStates.Running, Dispatcher, BitCanvas);
                 EventsSubscribe();
             } else
             {
@@ -63,11 +69,11 @@ namespace OOP_Prog
         private void StartTimed_Click(object sender, EventArgs e) //Handles clicking the "Start" button in TimeExp zone
         {
             TextboxExperimentTime.BorderBrush = Brushes.Gray;
-            if (timer == null || timer.State == Timer.TimerStates.Stopped)
+            if (Timer == null || Timer.State == Timer.TimerStates.Stopped)
             {
                 if (GetTextboxInput() != null)
                 {
-                    byte[] blank = new byte[bitCanvas.PixelWidth * bitCanvas.PixelHeight * bitCanvas.Format.BitsPerPixel / 8];
+                    byte[] blank = new byte[BitCanvas.PixelWidth * BitCanvas.PixelHeight * BitCanvas.Format.BitsPerPixel / 8];
                     for (int i = 0; i < blank.Length - 4; i += 4)
                     {
                         blank[i] = 0;
@@ -78,13 +84,13 @@ namespace OOP_Prog
 
                     Dispatcher.Invoke(() =>
                     {
-                        Int32Rect pix = new Int32Rect(0, 0, bitCanvas.PixelWidth, bitCanvas.PixelHeight);
-                        bitCanvas.WritePixels(pix, blank, bitCanvas.PixelWidth * (bitCanvas.Format.BitsPerPixel / 8), 0);
+                        Int32Rect pix = new Int32Rect(0, 0, BitCanvas.PixelWidth, BitCanvas.PixelHeight);
+                        BitCanvas.WritePixels(pix, blank, BitCanvas.PixelWidth * (BitCanvas.Format.BitsPerPixel / 8), 0);
                     });
 
-                    timer = new Timer((int)GetTextboxInput(), (TimeMeasures)ComboboxTimeMode.SelectedIndex);
-                    DishPic.Source = bitCanvas;
-                    experiment = new Experiment(Experiment.ExperimentStates.OnTimer, Dispatcher, bitCanvas);
+                    Timer = new Timer((int)GetTextboxInput(), (TimeMeasures)ComboboxTimeMode.SelectedIndex);
+                    DishPic.Source = BitCanvas;
+                    Experiment = new Experiment(Experiment.ExperimentStates.OnTimer, Dispatcher, BitCanvas);
                     EventsSubscribe();
                 } else
                 {
@@ -99,9 +105,9 @@ namespace OOP_Prog
 
         private void Stop_Click(object sender, EventArgs e) //Handles clicking the "Stop" button
         {
-            if (timer != null && timer.State != Timer.TimerStates.Stopped)
+            if (Timer != null && Timer.State != Timer.TimerStates.Stopped)
             {
-                timer.Stop();
+                Timer.Stop();
                 EventsUnsubscribe();
             } else
             {
@@ -113,15 +119,15 @@ namespace OOP_Prog
 
         public void UpdateTimeTrackers(object sender, EventArgs e) //Updates labels keeping track of time
         {
-            ElapsedLabel.Text = timer.GetElapsed();
-            EstimatedLabel.Text = timer.GetEstimated();
+            ElapsedLabel.Text = Timer.GetElapsed();
+            EstimatedLabel.Text = Timer.GetEstimated();
         }
 
         public void UpdateOrganismLabels(object sender, EventArgs e) //Updates values in labels tracking population of organisms
         {
-            LabelBacteriaCount.Text = experiment.organismTrackers[0].PopulationString;
-            LabelVirusCount.Text = experiment.organismTrackers[1].PopulationString;
-            LabelFungiCount.Text = experiment.organismTrackers[2].PopulationString;
+            LabelBacteriaCount.Text = Experiment.organismTrackers[0].PopulationString;
+            LabelVirusCount.Text = Experiment.organismTrackers[1].PopulationString;
+            LabelFungiCount.Text = Experiment.organismTrackers[2].PopulationString;
         }
 
         /*public void TimerExecutioner(object sender, EventArgs e) //Checks if timer ran out, the stops it
@@ -153,9 +159,9 @@ namespace OOP_Prog
 
         private void EventsSubscribe() //Subscribes OrganismTrackers to Timer tick and UI stuff to Rendering tick
         {
-            foreach (Experiment.OrganismTracker ot in experiment.organismTrackers)
+            foreach (Experiment.OrganismTracker ot in Experiment.organismTrackers)
             {
-                timer.Tick.Elapsed += ot.Tick;
+                Timer.Tick.Elapsed += ot.Tick;
             }
             CompositionTarget.Rendering += UpdateTimeTrackers;
             CompositionTarget.Rendering += UpdateOrganismLabels;
@@ -164,9 +170,9 @@ namespace OOP_Prog
 
         private void EventsUnsubscribe() //Unsubscribes OrganismTrackers from Timer tick and UI stuff from Rendering tick
         {
-            foreach (Experiment.OrganismTracker ot in experiment.organismTrackers)
+            foreach (Experiment.OrganismTracker ot in Experiment.organismTrackers)
             {
-                timer.Tick.Elapsed -= ot.Tick;
+                Timer.Tick.Elapsed -= ot.Tick;
             }
             CompositionTarget.Rendering -= UpdateTimeTrackers;
             CompositionTarget.Rendering -= UpdateOrganismLabels;
