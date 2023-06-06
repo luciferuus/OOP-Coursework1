@@ -262,8 +262,6 @@ namespace OOP_Prog
 
         public System.Timers.Timer Tick; //THE timer
 
-        private Time Zero = new Time(0, 0, 0, 0); //Used for comparason in timers with time limit
-
         public Timer() //Creates a timer with no time limit
         {
             State = TimerStates.Limitless;
@@ -385,18 +383,18 @@ namespace OOP_Prog
 
         public class OrganismTracker //Tracks one species of organisms
         {
-            WriteableBitmap wb;
-            Random random;
-            DrawUtils drawUtils;
-            Dispatcher dispatcher;
+            WriteableBitmap wb; //Canvas for pixels
+            Random random; //Random
+            DrawUtils drawUtils; //Tools used in drawing on WritableBitmap
+            Dispatcher dispatcher; //Dispathcer. Used to execute code on UI thread
             public Species Species; //Species that are tracked
             public long Population; //Self-explanatory
             private int TickTracker = 0; //Tracks when to multiply
             public byte[] ColorData; //Color used during drawing the organism
             public long power = 1; //Amount of organisms represented by 1 pixel
             private long drawn = 0; //Amount of already drawn organisms
-            private Func<long, long> progression = x => (long)Math.Round(Math.Sqrt(x * 4 * Math.Pow(1.1, 16)));
-            private long ticks = 0;
+            private Func<long, long> progression = x => (long)Math.Round(Math.Sqrt(x * 4 * Math.Pow(1.1, 16))); //Determines speed of organism multiplication
+            private long ticks = 0; //Tick tracker for correct progression
 
             public OrganismTracker(Species species, byte[] ColorData, Dispatcher dispatcher, WriteableBitmap writeableBitmap, Random random) //Creates a tracker of a species and gives them a color
             {
@@ -464,8 +462,9 @@ namespace OOP_Prog
             {
                 get
                 {
-                    if (Population >= long.MaxValue)
+                    if (Population >= long.MaxValue - 100)
                     {
+                        Population = long.MaxValue - 100;
                         return "OVERCROWDED";
                     }
                     else
