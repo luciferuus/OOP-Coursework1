@@ -19,7 +19,7 @@ namespace OOP_Prog
 
     public partial class MainWindow : Window
     {
-        Timer timer;
+        public Timer timer;
         public Experiment experiment;
         readonly WriteableBitmap bitCanvas;
 
