@@ -160,342 +160,342 @@ namespace OOP_Prog
             CompositionTarget.Rendering -= UpdateOrganismLabels;
             CompositionTarget.Rendering -= TimerExecutioner;
         }
+    }
 
-        public class Timer
+    public class Timer
+    {
+        public enum TimerStates //Possible states of the timer
         {
-            public enum TimerStates //Possible states of the timer
+            Stopped,
+            Limited,
+            Limitless
+        }
+
+        public struct Time //Stores days, hours, minutes and seconds
+        {
+            int Days;
+            int Hours;
+            int Minutes;
+            int Seconds;
+
+            public Time(int D, int H, int M, int S)
             {
-                Stopped,
-                Limited,
-                Limitless
+                Days = D;
+                Hours = H;
+                Minutes = M;
+                Seconds = S;
             }
 
-            public struct Time //Stores days, hours, minutes and seconds
+            public static Time operator --(Time a) //Decrease by 1 second
             {
-                int Days;
-                int Hours;
-                int Minutes;
-                int Seconds;
-
-                public Time(int D, int H, int M, int S)
+                while (true)
                 {
-                    Days = D;
-                    Hours = H;
-                    Minutes = M;
-                    Seconds = S;
-                }
-
-                public static Time operator --(Time a) //Decrease by 1 second
-                {
-                    while (true)
+                    if (a.Seconds == 0 && a.Minutes > 0)
                     {
-                        if (a.Seconds == 0 && a.Minutes > 0)
-                        {
-                            a.Seconds = 60; a.Minutes--;
-                        }
-                        else if (a.Minutes == 0 && a.Hours > 0)
-                        {
-                            a.Minutes = 60; a.Hours--;
-                        }
-                        else if (a.Hours == 0 && a.Days > 0)
-                        {
-                            a.Hours = 24; a.Days--;
-                        }
-                        else
-                        {
-                            break;
-                        }
+                        a.Seconds = 60; a.Minutes--;
                     }
-                    a.Seconds--;
-                    return a;
-                }
-
-                public static Time operator ++(Time a) //Increase by 1 second
-                {
-                    while (true)
+                    else if (a.Minutes == 0 && a.Hours > 0)
                     {
-                        if (a.Seconds == 60)
-                        {
-                            a.Seconds = 0; a.Minutes++;
-                        }
-                        else if (a.Minutes == 60)
-                        {
-                            a.Minutes = 0; a.Hours++;
-                        }
-                        else if (a.Hours == 24)
-                        {
-                            a.Hours = 0; a.Days++;
-                        }
-                        else
-                        {
-                            break;
-                        }
+                        a.Minutes = 60; a.Hours--;
                     }
-                    a.Seconds++;
-                    return a;
-                }
-
-                public override string ToString()
-                {
-                    return $"{TStr(Days)}:{TStr(Hours)}:{TStr(Minutes)}:{TStr(Seconds)}";
-                }
-
-                private string TStr(int val) //Used in ToString() to output components of time in conventional way
-                {
-                    if (val < 10)
+                    else if (a.Hours == 0 && a.Days > 0)
                     {
-                        return "0" + val.ToString();
+                        a.Hours = 24; a.Days--;
                     }
                     else
                     {
-                        return val.ToString();
+                        break;
                     }
                 }
+                a.Seconds--;
+                return a;
             }
 
-            public TimerStates State { get; private set; } //Current state of the timer
-
-            private Time Elapsed { get; set; } //Tracks time elapsed from the start
-
-            private Time Estimated { get; set; } //Track estimated time
-
-            public System.Timers.Timer Tick; //THE timer
-
-            private Time Zero = new Time(0, 0, 0, 0); //Used for comparason in timers with time limit
-
-            public Timer() //Creates a timer with no time limit
+            public static Time operator ++(Time a) //Increase by 1 second
             {
-                State = TimerStates.Limitless;
-                Initialize();
-            }
-
-            public Timer(int value, TimeMeasures measure) //Creates timer with a time limit
-            {
-                State = TimerStates.Limited;
-                switch (measure)
+                while (true)
                 {
-                    case TimeMeasures.Seconds:
-                        Estimated = new Time(0, 0, 0, value);
+                    if (a.Seconds == 60)
+                    {
+                        a.Seconds = 0; a.Minutes++;
+                    }
+                    else if (a.Minutes == 60)
+                    {
+                        a.Minutes = 0; a.Hours++;
+                    }
+                    else if (a.Hours == 24)
+                    {
+                        a.Hours = 0; a.Days++;
+                    }
+                    else
+                    {
                         break;
-
-                    case TimeMeasures.Minutes:
-                        Estimated = new Time(0, 0, value, 0);
-                        break;
-
-                    case TimeMeasures.Hours:
-                        Estimated = new Time(0, value, 0, 0);
-                        break;
-
-                    case TimeMeasures.Days:
-                        Estimated = new Time(value, 0, 0, 0);
-                        break;
+                    }
                 }
-                Initialize();
+                a.Seconds++;
+                return a;
             }
 
-            private void InternalTick(object sender, EventArgs e) //Things that happen inside the timer on tick
+            public override string ToString()
             {
-                switch (State)
-                {
-                    case TimerStates.Limitless:
-
-                        break;
-
-                    case TimerStates.Limited:
-                        if (Estimated.Equals(Zero))
-                        {
-                            this.State = TimerStates.Stopped;
-                            this.Stop();
-
-                        }
-                        else
-                        {
-                            Estimated--;
-                        }
-                        break;
-
-                    case TimerStates.Stopped:
-
-                        break;
-                }
-                if (this.State != TimerStates.Stopped)
-                {
-                    Elapsed++;
-                }
+                return $"{TStr(Days)}:{TStr(Hours)}:{TStr(Minutes)}:{TStr(Seconds)}";
             }
 
-            public string GetElapsed() //Returns elapsed time
+            private string TStr(int val) //Used in ToString() to output components of time in conventional way
             {
-                return Elapsed.ToString();
-            }
-
-            public string GetEstimated() //Returns estimated time
-            {
-                if (State == TimerStates.Limitless)
+                if (val < 10)
                 {
-                    return "Infinity";
+                    return "0" + val.ToString();
                 }
                 else
                 {
-                    return Estimated.ToString();
+                    return val.ToString();
                 }
-            }
-
-            public void Stop() //Stops the timer
-            {
-                State = TimerStates.Stopped;
-                Tick.Stop();
-            }
-
-            private void Initialize() //Performes setup common for all types of timers
-            {
-                Elapsed = new Time(0, 0, 0, 0);
-                Tick = new System.Timers.Timer(1000);
-                Tick.Elapsed += InternalTick;
-                Tick.AutoReset = true;
-                Tick.Start();
             }
         }
 
-        public class Experiment
+        public TimerStates State { get; private set; } //Current state of the timer
+
+        private Time Elapsed { get; set; } //Tracks time elapsed from the start
+
+        private Time Estimated { get; set; } //Track estimated time
+
+        public System.Timers.Timer Tick; //THE timer
+
+        private Time Zero = new Time(0, 0, 0, 0); //Used for comparason in timers with time limit
+
+        public Timer() //Creates a timer with no time limit
         {
-            ExperimentStates State; //Current state of the experiment
+            State = TimerStates.Limitless;
+            Initialize();
+        }
+
+        public Timer(int value, TimeMeasures measure) //Creates timer with a time limit
+        {
+            State = TimerStates.Limited;
+            switch (measure)
+            {
+                case TimeMeasures.Seconds:
+                    Estimated = new Time(0, 0, 0, value);
+                    break;
+
+                case TimeMeasures.Minutes:
+                    Estimated = new Time(0, 0, value, 0);
+                    break;
+
+                case TimeMeasures.Hours:
+                    Estimated = new Time(0, value, 0, 0);
+                    break;
+
+                case TimeMeasures.Days:
+                    Estimated = new Time(value, 0, 0, 0);
+                    break;
+            }
+            Initialize();
+        }
+
+        private void InternalTick(object sender, EventArgs e) //Things that happen inside the timer on tick
+        {
+            switch (State)
+            {
+                case TimerStates.Limitless:
+
+                    break;
+
+                case TimerStates.Limited:
+                    if (Estimated.Equals(Zero))
+                    {
+                        this.State = TimerStates.Stopped;
+                        this.Stop();
+
+                    }
+                    else
+                    {
+                        Estimated--;
+                    }
+                    break;
+
+                case TimerStates.Stopped:
+
+                    break;
+            }
+            if (this.State != TimerStates.Stopped)
+            {
+                Elapsed++;
+            }
+        }
+
+        public string GetElapsed() //Returns elapsed time
+        {
+            return Elapsed.ToString();
+        }
+
+        public string GetEstimated() //Returns estimated time
+        {
+            if (State == TimerStates.Limitless)
+            {
+                return "Infinity";
+            }
+            else
+            {
+                return Estimated.ToString();
+            }
+        }
+
+        public void Stop() //Stops the timer
+        {
+            State = TimerStates.Stopped;
+            Tick.Stop();
+        }
+
+        private void Initialize() //Performes setup common for all types of timers
+        {
+            Elapsed = new Time(0, 0, 0, 0);
+            Tick = new System.Timers.Timer(1000);
+            Tick.Elapsed += InternalTick;
+            Tick.AutoReset = true;
+            Tick.Start();
+        }
+    }
+
+    public class Experiment
+    {
+        ExperimentStates State; //Current state of the experiment
+        Random random;
+
+        public enum ExperimentStates //Possible states of the experiment
+        {
+            Stopped,
+            Running,
+            OnTimer
+        }
+
+        public enum Species //Organism species and their multiplying period
+        {
+            Bacteria = 1,
+            Virus = 2,
+            Fungus = 3
+        }
+
+        public List<OrganismTracker> organismTrackers = new List<OrganismTracker>(); //List of organism trackers
+
+        public Experiment(ExperimentStates experimentState, Dispatcher dispatcher, WriteableBitmap writeableBitmap) //Creates an experiment with specific state and 3 trackers for 3 species
+        {
+            random = new Random();
+            organismTrackers.Add(new OrganismTracker(Species.Bacteria, new byte[4] { 0, 255, 0, 255 }, dispatcher, writeableBitmap, random));
+            organismTrackers.Add(new OrganismTracker(Species.Virus, new byte[4] { 0, 0, 255, 255 }, dispatcher, writeableBitmap, random));
+            organismTrackers.Add(new OrganismTracker(Species.Fungus, new byte[4] { 255, 0, 0, 255 }, dispatcher, writeableBitmap, random));
+        }
+
+        public class OrganismTracker //Tracks one species of organisms
+        {
+            WriteableBitmap wb;
             Random random;
+            DrawUtils drawUtils;
+            Dispatcher dispatcher;
+            public Species Species; //Species that are tracked
+            public long Population; //Self-explanatory
+            private int TickTracker = 0; //Tracks when to multiply
+            public byte[] ColorData; //Color used during drawing the organism
+            public long power = 1; //Amount of organisms represented by 1 pixel
+            private long drawn = 0; //Amount of already drawn organisms
+            private Func<long, long> progression = x => (long)Math.Round(Math.Sqrt(x * 4 * Math.Pow(1.1, 16)));
+            private long ticks = 0;
 
-            public enum ExperimentStates //Possible states of the experiment
+            public OrganismTracker(Species species, byte[] ColorData, Dispatcher dispatcher, WriteableBitmap writeableBitmap, Random random) //Creates a tracker of a species and gives them a color
             {
-                Stopped,
-                Running,
-                OnTimer
+                this.Species = species;
+                this.ColorData = ColorData;
+                this.dispatcher = dispatcher;
+                this.wb = writeableBitmap;
+                this.drawUtils = new DrawUtils(wb);
+                this.random = random;
+                Population = 1;
+                DrawOrganisms((int)Population / (int)power);
             }
 
-            public enum Species //Organism species and their multiplying period
+            async void Multiply() //Doubles population
             {
-                Bacteria = 1,
-                Virus = 5,
-                Fungus = 7
+                ticks++;
+                Population = progression(ticks);
+                int toDraw = (int)((Population - drawn) / power);
+                await dispatcher.InvokeAsync(() => DrawOrganisms(toDraw));
             }
 
-            public List<OrganismTracker> organismTrackers = new List<OrganismTracker>(); //List of organism trackers
-
-            public Experiment(ExperimentStates experimentState, Dispatcher dispatcher, WriteableBitmap writeableBitmap) //Creates an experiment with specific state and 3 trackers for 3 species
+            private void DrawOrganisms(int amount) //Draws specific amount of pixels on a bitmap
             {
-                random = new Random();
-                organismTrackers.Add(new OrganismTracker(Species.Bacteria, new byte[4] { 0, 255, 0, 255 }, dispatcher, writeableBitmap, random));
-                organismTrackers.Add(new OrganismTracker(Species.Virus, new byte[4] { 0, 0, 255, 255 }, dispatcher, writeableBitmap, random));
-                organismTrackers.Add(new OrganismTracker(Species.Fungus, new byte[4] { 255, 0, 0, 255 }, dispatcher, writeableBitmap, random));
+                drawn += amount * power;
+                int Column;
+                int Row;
+                for (int i = 0; i < amount; i++)
+                {
+                    Column = GetCoordinate(wb.PixelWidth / 2, wb.PixelWidth / 10);
+                    Row = GetCoordinate(wb.PixelHeight / 2, wb.PixelHeight / 10);
+                    Int32Rect pix = new Int32Rect(Row, Column, 1, 1);
+                    wb.WritePixels(pix, ColorData, DrawUtils.GetStride(wb), 0);
+                }
             }
 
-            public class OrganismTracker //Tracks one species of organisms
+            public void ClearBitmap() //Clears the bitmap
             {
-                WriteableBitmap wb;
-                Random random;
-                DrawUtils drawUtils;
-                Dispatcher dispatcher;
-                public Species Species; //Species that are tracked
-                public long Population; //Self-explanatory
-                private int TickTracker = 0; //Tracks when to multiply
-                public byte[] ColorData; //Color used during drawing the organism
-                public long power = 1; //Amount of organisms represented by 1 pixel
-                private long drawn = 0; //Amount of already drawn organisms
-                private Func<long, long> progression = x => (long)Math.Round(Math.Sqrt(x * 4 * Math.Pow(1.1, 16)));
-                private long ticks = 0;
-
-                public OrganismTracker(Species species, byte[] ColorData, Dispatcher dispatcher, WriteableBitmap writeableBitmap, Random random) //Creates a tracker of a species and gives them a color
+                dispatcher.Invoke(() =>
                 {
-                    this.Species = species;
-                    this.ColorData = ColorData;
-                    this.dispatcher = dispatcher;
-                    this.wb = writeableBitmap;
-                    this.drawUtils = new DrawUtils(wb);
-                    this.random = random;
-                    Population = 1;
-                    DrawOrganisms((int)Population/(int)power);
+                    Int32Rect pix = new Int32Rect(0, 0, wb.PixelWidth, wb.PixelHeight);
+                    wb.WritePixels(pix, drawUtils.blank, DrawUtils.GetStride(wb), 0);
+                });
+            }
+
+            private int GetCoordinate(int origin, double spread)
+            {
+                double x1 = 1 - random.NextDouble();
+                double x2 = 1 - random.NextDouble();
+
+                double y1 = Math.Sqrt(-2.0 * Math.Log(x1)) * Math.Cos(2.0 * Math.PI * x2);
+                return (int)((y1 * spread) % 1000) + origin;
+            }
+
+            public void Tick(object sender, EventArgs e) //Tick, must be subscribed to tick in timer
+            {
+                TickTracker++;
+                if (TickTracker == (int)Species)
+                {
+                    TickTracker = 0;
+                    Multiply();
                 }
+            }
 
-                async void Multiply() //Doubles population
+            public string PopulationString //Returns population as a string
+            {
+                get
                 {
-                    ticks++;
-                    Population = progression(ticks);
-                    int toDraw = (int)((Population - drawn) / power);
-                    await dispatcher.InvokeAsync(() => DrawOrganisms(toDraw));
-                }
-
-                private void DrawOrganisms(int amount) //Draws specific amount of pixels on a bitmap
-                {
-                    drawn += amount * power;
-                    int Column;
-                    int Row;
-                    for (int i = 0; i < amount; i++)
+                    if (Population >= long.MaxValue)
                     {
-                        Column = GetCoordinate(wb.PixelWidth / 2, wb.PixelWidth / 10);
-                        Row = GetCoordinate(wb.PixelHeight / 2, wb.PixelHeight / 10);
-                        Int32Rect pix = new Int32Rect(Row, Column, 1, 1);
-                        wb.WritePixels(pix, ColorData, DrawUtils.GetStride(wb), 0);
+                        return "OVERCROWDED";
+                    }
+                    else
+                    {
+                        return Population.ToString();
+                    }
+                }
+            }
+
+            private class DrawUtils //Utilities for drawing on a WritableBitmap
+            {
+                readonly public byte[] blank; //Array of white pixels. Used for clearing the bitmap
+
+                public DrawUtils(WriteableBitmap wb)
+                {
+                    blank = new byte[wb.PixelWidth * wb.PixelHeight * wb.Format.BitsPerPixel / 8];
+                    for (int i = 0; i < blank.Length - 4; i += 4)
+                    {
+                        blank[i] = 0;
+                        blank[i + 1] = 0;
+                        blank[i + 2] = 0;
+                        blank[i + 3] = 255;
                     }
                 }
 
-                public void ClearBitmap() //Clears the bitmap
-                {
-                    dispatcher.Invoke(() =>
-                    {
-                        Int32Rect pix = new Int32Rect(0, 0, wb.PixelWidth, wb.PixelHeight);
-                        wb.WritePixels(pix, drawUtils.blank, DrawUtils.GetStride(wb), 0);
-                    });
-                }
-
-                private int GetCoordinate(int origin, double spread)
-                {
-                    double x1 = 1 - random.NextDouble();
-                    double x2 = 1 - random.NextDouble();
-
-                    double y1 = Math.Sqrt(-2.0 * Math.Log(x1)) * Math.Cos(2.0 * Math.PI * x2);
-                    return (int)((y1 * spread) % 1000) + origin;
-                }
-
-                public void Tick(object sender, EventArgs e) //Tick, must be subscribed to tick in timer
-                {
-                    TickTracker++;
-                    if (TickTracker == (int)Species)
-                    {
-                        TickTracker = 0;
-                        Multiply();
-                    }
-                }
-
-                public string PopulationString //Returns population as a string
-                {
-                    get
-                    {
-                        if (Population >= long.MaxValue)
-                        {
-                            return "OVERCROWDED";
-                        }
-                        else
-                        {
-                            return Population.ToString();
-                        }
-                    }
-                }
-
-                private class DrawUtils //Utilities for drawing on a WritableBitmap
-                {
-                    readonly public byte[] blank; //Array of white pixels. Used for clearing the bitmap
-
-                    public DrawUtils(WriteableBitmap wb)
-                    {
-                        blank = new byte[wb.PixelWidth * wb.PixelHeight * wb.Format.BitsPerPixel / 8];
-                        for (int i = 0; i < blank.Length - 4; i += 4)
-                        {
-                            blank[i] = 0;
-                            blank[i + 1] = 0;
-                            blank[i + 2] = 0;
-                            blank[i + 3] = 255;
-                        }
-                    }
-
-                    public static int GetStride(WriteableBitmap wb) => wb.PixelWidth * (wb.Format.BitsPerPixel / 8); //Calculates stride, used for writing pixels into the bitmap
-                }
+                public static int GetStride(WriteableBitmap wb) => wb.PixelWidth * (wb.Format.BitsPerPixel / 8); //Calculates stride, used for writing pixels into the bitmap
             }
         }
     }
