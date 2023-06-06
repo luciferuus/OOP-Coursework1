@@ -54,6 +54,9 @@ namespace OOP_Prog
                 DishPic.Source = bitCanvas;
                 experiment = new Experiment(Experiment.ExperimentStates.Running, Dispatcher, bitCanvas);
                 EventsSubscribe();
+            } else
+            {
+                MessageBox.Show("Unable to start new experiment when one is already in process.", "Start denied", MessageBoxButton.OK, MessageBoxImage.Hand);
             }
         }
 
@@ -83,8 +86,14 @@ namespace OOP_Prog
                     DishPic.Source = bitCanvas;
                     experiment = new Experiment(Experiment.ExperimentStates.OnTimer, Dispatcher, bitCanvas);
                     EventsSubscribe();
+                } else
+                {
+                    MessageBox.Show("Time must be a whole number >= 0. Please try again.", "Input error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
 
+            } else
+            {
+                MessageBox.Show("Unable to start new experiment when one is already in process.", "Start denied", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -94,6 +103,9 @@ namespace OOP_Prog
             {
                 timer.Stop();
                 EventsUnsubscribe();
+            } else
+            {
+                MessageBox.Show("To stop an experiment, there must be a running one.", "Nothing to stop", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -394,7 +406,7 @@ namespace OOP_Prog
             public byte[] ColorData; //Color used during drawing the organism
             public long power = 1; //Amount of organisms represented by 1 pixel
             private long drawn = 0; //Amount of already drawn organisms
-            private Func<long, long> progression = x => (long)Math.Round(Math.Sqrt(x * 4 * Math.Pow(1.1, 16))); //Determines speed of organism multiplication
+            private Func<long, long> progression = x => (long)Math.Round(Math.Sqrt(2 * x * 4 * Math.Pow(1.11, 16))); //Determines speed of organism multiplication
             private long ticks = 0; //Tick tracker for correct progression
 
             public OrganismTracker(Species species, byte[] ColorData, Dispatcher dispatcher, WriteableBitmap writeableBitmap, Random random) //Creates a tracker of a species and gives them a color
