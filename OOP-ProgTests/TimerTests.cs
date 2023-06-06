@@ -48,13 +48,13 @@ namespace OOP_ProgTests
         [TestMethod]
         public void TestLimited()
         {
-            OOP_Prog.Timer timer = new OOP_Prog.Timer(1, TimeMeasures.Hours);
+            OOP_Prog.Timer timer = new OOP_Prog.Timer(1, TimeMeasures.Days);
             Assert.AreEqual(OOP_Prog.Timer.TimerStates.Limited, timer.State);
             DbgTickChecks dbgTickChecks = new DbgTickChecks();
             timer.Tick.Elapsed += dbgTickChecks.TickReciever;
             while(dbgTickChecks.ticksRecieved < 3) { }
             timer.Tick.Elapsed -= dbgTickChecks.TickReciever;
-            Assert.AreEqual("00:00:59:57", timer.GetEstimated());
+            Assert.AreEqual("00:23:59:57", timer.GetEstimated());
             
             timer.Stop();
             timer = new OOP_Prog.Timer(3, TimeMeasures.Seconds);
