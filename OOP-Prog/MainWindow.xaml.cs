@@ -294,6 +294,10 @@ namespace OOP_Prog
 
         private void InternalTick(object sender, EventArgs e) //Things that happen inside the timer on tick
         {
+            if (this.State != TimerStates.Stopped)
+            {
+                Elapsed++;
+            }
             switch (State)
             {
                 case TimerStates.Limitless:
@@ -313,10 +317,7 @@ namespace OOP_Prog
 
                     break;
             }
-            if (this.State != TimerStates.Stopped)
-            {
-                Elapsed++;
-            }
+            
         }
 
         public string GetElapsed() //Returns elapsed time
