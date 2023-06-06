@@ -124,13 +124,13 @@ namespace OOP_Prog
             LabelFungiCount.Text = experiment.organismTrackers[2].PopulationString;
         }
 
-        public void TimerExecutioner(object sender, EventArgs e) //Checks if timer ran out, the stops it
+        /*public void TimerExecutioner(object sender, EventArgs e) //Checks if timer ran out, the stops it
         {
             if (timer.State == Timer.TimerStates.Stopped)
             {
                 timer.Stop();
             }
-        }
+        }*/
 
         public int? GetTextboxInput() //Gets the value from the textbox in TimeExp zone and checks it if it is valid
         {
@@ -159,7 +159,7 @@ namespace OOP_Prog
             }
             CompositionTarget.Rendering += UpdateTimeTrackers;
             CompositionTarget.Rendering += UpdateOrganismLabels;
-            CompositionTarget.Rendering += TimerExecutioner;
+            //CompositionTarget.Rendering += TimerExecutioner;
         }
 
         private void EventsUnsubscribe() //Unsubscribes OrganismTrackers from Timer tick and UI stuff from Rendering tick
@@ -170,7 +170,7 @@ namespace OOP_Prog
             }
             CompositionTarget.Rendering -= UpdateTimeTrackers;
             CompositionTarget.Rendering -= UpdateOrganismLabels;
-            CompositionTarget.Rendering -= TimerExecutioner;
+            //CompositionTarget.Rendering -= TimerExecutioner;
         }
     }
 
