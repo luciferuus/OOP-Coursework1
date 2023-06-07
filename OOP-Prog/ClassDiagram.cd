@@ -10,7 +10,7 @@
       <Property Name="Experiment" />
       <Property Name="Timer" />
     </ShowAsAssociation>
-    <Lollipop Orientation="Left" Position="1.308" Collapsed="true" />
+    <Lollipop Orientation="Bottom" Position="0.1" Collapsed="true" />
   </Class>
   <Class Name="OOP_Prog.Timer">
     <Position X="9.25" Y="1.25" Width="2" />
