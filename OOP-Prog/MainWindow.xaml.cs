@@ -130,14 +130,6 @@ namespace OOP_Prog
             LabelFungiCount.Text = Experiment.organismTrackers[2].PopulationString;
         }
 
-        /*public void TimerExecutioner(object sender, EventArgs e) //Checks if timer ran out, the stops it
-        {
-            if (timer.State == Timer.TimerStates.Stopped)
-            {
-                timer.Stop();
-            }
-        }*/
-
         public int? GetTextboxInput() //Gets the value from the textbox in TimeExp zone and checks it if it is valid
         {
             int input;
@@ -165,7 +157,6 @@ namespace OOP_Prog
             }
             CompositionTarget.Rendering += UpdateTimeTrackers;
             CompositionTarget.Rendering += UpdateOrganismLabels;
-            //CompositionTarget.Rendering += TimerExecutioner;
         }
 
         private void EventsUnsubscribe() //Unsubscribes OrganismTrackers from Timer tick and UI stuff from Rendering tick
@@ -176,7 +167,12 @@ namespace OOP_Prog
             }
             CompositionTarget.Rendering -= UpdateTimeTrackers;
             CompositionTarget.Rendering -= UpdateOrganismLabels;
-            //CompositionTarget.Rendering -= TimerExecutioner;
+        }
+
+        private void ShowAbout(object sender, EventArgs e)
+        {
+            AboutWindow about = new AboutWindow();
+            about.ShowDialog();
         }
     }
 
@@ -410,7 +406,7 @@ namespace OOP_Prog
             public long Population; //Self-explanatory
             private int TickTracker = 0; //Tracks when to multiply
             public byte[] ColorData; //Color used during drawing the organism
-            public long power = 1; //Amount of organisms represented by 1 pixel
+            private long power { get; set; } = 1; //Amount of organisms represented by 1 pixel
             private long drawn = 0; //Amount of already drawn organisms
             private Func<long, long> progression = x => (long)Math.Round(Math.Sqrt(2 * x * 4 * Math.Pow(1.21, 16))); //Determines speed of organism multiplication
             private long ticks = 0; //Tick tracker for correct progression
